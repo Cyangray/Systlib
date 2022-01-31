@@ -1,11 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
+'''
 Created on Fri Aug 20 11:52:45 2021
 
-@author: francesco
-"""
+@author: francesco, last modified 31st January 2022
 
+Code to find the level density at separation energy and the <Gamma_gamma> value 
+for 127Sb by comparing to neighbouring nuclei.
+for rho(Sn): 
+Use the experimental values for neighbouring stable nuclei present in Mughabghab
+and RIPL, and fit the theoretical values to these from E&B2005.
+then use the fit in order to guess the value for 127Sb.
+for <Gamma_gamma>:
+Use experimental values again from Mughabghab and/or RIPL and extrapolate these
+values to find the predicted one for 127Sb by either taking the average of the
+values, or doing a linear extrapolation by 
+'''
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,48 +23,38 @@ import pandas as pd
 import scipy.optimize as sc
 from sklearn.linear_model import LinearRegression
 import sys
+from systlib import *
 sys.path.insert(1, '/home/francesco/Documents/Talys-calculations')
 from readlib import *
 
-'''
-Code to find the level density at separation energy for 127Sb with systematics,
-or the Gamma-gamma value. 
-Use the experimental values for near known nuclei and fit for the theoretical values, 
-then use the fit in order to guess the value for 127Sb.
-'''
 #what to fit? 'rho' or 'Gg'
-What_fit = 'Gg'
-#if 'Gg',choose what to have on the x axis
+What_fit = 'rho'
+#if 'Gg': choose what to have on the x axis
 Gg_axis = 'A'
-#calculate average? 'Mugh', 'RIPL' or 'both'
-calc_avg = 'RIPL'
-#regression?
-Gg_regr = 'RIPL'
-#Sort by element? False if not
-element = False
-#Subtract dn? False if not
+#if 'Gg': calculate average? 'Mugh', 'RIPL' or 'both'
+calc_avg = 'both'
+#if 'Gg': regression? 'Mugh', 'RIPL' or 'both'
+Gg_regr = 'Mugh'
+#Sort by element? 50, 51, 52. False or 0 if not
+element = 0
+#Subtract dn from Sn? False or 0 if not
 subtract_dn = 0
 #Plot?
 plot = 1
-#fit?
+#if 'rho': fit?
 fit127Sb = True
-#if so, fit with RIPL or Mugh?
+#if 'rho': if so, fit with RIPL or Mugh?
 fit_with='Mugh'
-#plotchi2?
-plotchi = 0
 
 
 
 
-
-#                 Resonance data for s-wave resonances 
-# Z El  A   Io     Bn        D0        dD      S0    dS    Gg   dG   Com.
-#                 [MeV]     [keV]     [keV]  [1E-4][1E-4][meV][meV]  &Ref
 #import resonance data from RIPL
 RIPL = np.genfromtxt('resonances0.dat', skip_header=125, max_rows=16)
-#Matrix with the neutron pairing energy, to be subtracted from the separation energy of neutron-even nuclei in order to be able to compare their NLD at Sn to the neutron-odd nuclei
+#Matrix with the neutron pairing energy, to be subtracted from the separation 
+#energy of neutron-even nuclei in order to be able to compare their NLD at Sn 
+#to the neutron-odd nuclei
 dn_matr = np.loadtxt('doba_delta_n.dat')
-
 
 #create dataframe with nuclear data.
 #MughD0 + uncertainty are taken from Mughabghab. RhoMugh and uncertainty calculated with d2rho
@@ -109,19 +109,17 @@ d = {"Z": pd.Series(Zs, index=elnames),
 df_whole = pd.DataFrame(d)
 df_whole.sort_values(by=['Z','A'],inplace=True)
 
+Sb127_serie = df_whole.loc['127Sb',:].copy(deep=True)
 if subtract_dn:
     df_whole['Sn'] -= df_whole['dn']
-    #sum_column = df['Sn'] - df['dn']
-    #df['Sn'] = sum_column
-
 if element:
     df = df_whole.loc[df_whole['Z'] == element]
 else:
     df = df_whole
 
-
 if What_fit == 'rho':
-    #Follow Ina's algorithm for chi squared minimization. Fit the theoretical values to the experimental (up to a scale factor b).
+    #Follows the algorithm from Kullmann et al. 2019 for chi squared minimization. 
+    #Fit the theoretical values to the experimental (up to a scale factor b).
     #From the fit, guess the theoretical prediction of 127Sb by multiplying the E&B value of rho, with b
     if fit127Sb:
         def chi2sum(b):
@@ -131,13 +129,7 @@ if What_fit == 'rho':
                     chi2+=(b*row['rho_EB'] - row['rho_'+ fit_with])**2/row['rho_'+ fit_with + '_err']**2
             return chi2
         
-        if plotchi:
-            bs = np.linspace(0,2)
-            chi2s = [chi2sum(b) for b in bs]
-            plt.plot(bs,chi2s)
-        
         result = sc.minimize(chi2sum, x0=0.63)
-        
         bmin = result.x[0]
         chimin = result.fun
         if element:
@@ -145,12 +137,13 @@ if What_fit == 'rho':
         print('Original, E&B value of 127Sb: %f'%(df_whole.at['127Sb','rho_EB']))
         print('b (scale factor): %s'%bmin)
         print('predicted value of rho for 127Sb: %s'%(df_whole.at['127Sb','rho_EB']*bmin))
-        print(chimin)
+        print('chi2 score: %f'%chimin)
     else:
         bmin = 1
         
     #Plot rho as function of separation energy
     if plot:
+        df = df.append(Sb127_serie)
         df.reset_index(inplace=True)
         xaxis = df['Sn']
         fig, ax = plt.subplots()
@@ -159,19 +152,17 @@ if What_fit == 'rho':
         ax.errorbar(xaxis, df['rho_Mugh'], yerr=df['rho_Mugh_err'], color='r', capsize=2, ls='none')
         ax.plot(xaxis, df['rho_RIPL'], 'bo', alpha=0.5, label='RIPL')
         ax.errorbar(xaxis, df['rho_RIPL'], yerr=df['rho_RIPL_err'], color='b', capsize=2, ls='none')
-        ax.set_ylabel(r'$\rho$(Sn) [MeV$^{-1}$]')
-        
-        #ax.set_xticks(np.arange(len(xaxis)))
-        #ax.set_xticklabels(xaxis,rotation=60)
+        ax.set_ylabel(r'$\rho$($S_n$) [MeV$^{-1}$]')
+        ax.set_xlim(np.nanmin(df.loc[:,'Sn'])-300,np.nanmax(df.loc[:,'Sn'])+500)
         plt.yscale('log')
         plt.grid()
         plt.legend()
         for index, row in df.iterrows():
-            ax.annotate(row['index'], xy = (row['Sn'], row['rho_EB']), xytext=(row['Sn']+40, row['rho_EB']))
-        #df.plot(x='Sn', y=['rho_Mugh','rho_EB'],
-        #df.plot(use_index=True, y=['rho_Mugh','rho_EB'],  
-        #        style = 'o', logy=True, grid=True)
-        #df.plot(x='Sn', y='rho_EB', style='ro')
+            ax.annotate(r'$^{%d}$%s'%(row['A'],Z2Name(row['Z'])), xy = (row['Sn']+50, row['rho_EB']*7e-1))#, xytext=(row['Sn']+40, row['rho_EB']))
+        plt.show()
+        
+        
+        
 elif What_fit == 'Gg':
     #extrapolate the Gg value og 127Sb from a model buildt on different nuclei
     if calc_avg:
@@ -215,43 +206,35 @@ elif What_fit == 'Gg':
         linear_regressor.fit(X, Y)  # perform linear regression
         Y_pred = linear_regressor.predict([[127]])  # make predictions
         print('calculated prediction with linear regression with %s: %f'%(Gg_regr, Y_pred[0,0]))
-        '''
-        bmin = result.x[0]
-        chimin = result.fun
-        if element:
-            print('fitting by ' + Z2Name(element) + ' with ' + fit_with)
-        print('Original, E&B value of 127Sb: %f'%(df_whole.at['127Sb','rho_EB']))
-        print('b (scale factor): %s'%bmin)
-        print('predicted value of rho for 127Sb: %s'%(df_whole.at['127Sb','rho_EB']*bmin))
-        print(chimin)
-        '''
                 
-    
-    
     #Plot Gg as function of separation energy
     if plot:
         df.reset_index(inplace=True)
         xaxis = df[Gg_axis]
         fig, ax = plt.subplots()
-        fig.set_size_inches(20, 10)
-        ax.plot(xaxis, df['Gg_Mugh'], 'ro', alpha=0.5, label='Mughabghab')
-        ax.errorbar(xaxis, df['Gg_Mugh'], yerr=df['Gg_Mugh_err'], color='r', capsize=2, ls='none')
-        ax.plot(xaxis, df['Gg_RIPL'], 'bo', alpha=0.5, label='RIPL')
-        ax.errorbar(xaxis, df['Gg_RIPL'], yerr=df['Gg_RIPL_err'], color='b', capsize=2, ls='none')
+        #fig.set_size_inches(20, 10)
+        ax.plot(xaxis, df['Gg_Mugh'], 'bo', alpha=0.7, label='Mugh')
+        ax.errorbar(xaxis, df['Gg_Mugh'], yerr=df['Gg_Mugh_err'], color='b', ecolor = 'b', capsize=2, ls='none')
+        ax.plot(xaxis, df['Gg_RIPL'], 'gv', alpha=0.4, label='RIPL')
+        ax.errorbar(xaxis, df['Gg_RIPL'], yerr=df['Gg_RIPL_err'], color='g', ecolor = 'g', capsize=2, ls='none')
         ax.set_ylabel(r'$\langle\Gamma_\gamma\rangle$ [meV]')
         if Gg_regr:
             Y_pred0 = linear_regressor.predict([[117]])
             ax.plot([117,127], [Y_pred0[0,0],Y_pred[0,0]],'k--')
+        ax.plot(127,105,'k^', label = r'$^{127}$Sb, pred.')
+        ax.errorbar(127, 105, yerr=25, color='k', capsize=2, ls='none')
+        ax.annotate(r'$^{127}$Sb', xy = (127, 105), xytext=(127, 105))
         #plt.yscale('log')
-        plt.grid()
+        #plt.grid()
         plt.legend()
         if Gg_axis == 'A':
             for index, row in df.iterrows():
-                ax.annotate(row['index'], xy = (row['A'], row['Gg_Mugh']), xytext=(row['A'], row['Gg_Mugh']))
+                ax.annotate(ToLatex(row['index']), xy = (row['A'], row['Gg_Mugh']), xytext=(row['A'], row['Gg_Mugh']))
             ax.set_xlabel('A')
             
         elif Gg_axis == 'Sn':
             for index, row in df.iterrows():
-                ax.annotate(row['index'], xy = (row['Sn'], row['Gg_Mugh']), xytext=(row['Sn'] + 40, row['Gg_Mugh']))
-            ax.set_xlabel('Sn [MeV]')    
+                ax.annotate(ToLatex(row['index']), xy = (row['Sn'], row['Gg_Mugh']), xytext=(row['Sn'] + 40, row['Gg_Mugh']))
+            ax.set_xlabel(r'$S_n$ [MeV]')
+        ax.set_xlim(115,131.9)
         plt.show()

@@ -5,10 +5,11 @@ Created on Thu Oct 14 15:26:05 2021
 
 @author: francesco, last update 31st january 2022
 
-Script to loop through counting.c from the Oslo method.
+Script to loop through counting.c and normalization.c from the Oslo method.
 It creates a directory structure with different input.cnt with different values
 of L1, L2 and rho, and runs counting on them. The results are written in each its
-folder.
+folder. Then for each of these, normalization.c is run with different values of
+<Gamma_gamma>
 Preparations: 
 1) in the same folder as this script, put copies of counting.dat, 
 rhosp.rsg, sigsp.rsg, rhopaw.rsg, sigpaw.rsg files in the same folder
@@ -19,9 +20,9 @@ code variables. Use the example for 127Sb here as an example
 values in newinput_nrm with the one you got, keeping the name of the python variables
 here.
 
-NB: it needs a slightly modified (and recompiled) counting.c, where all lines 
-where it asks input (sscanf, I think) must be commented out, so that it only 
-imports data from input.cnt
+NB: it needs a slightly modified (and recompiled) counting.c and normalization, 
+where all lines where it asks input (sscanf, I think) must be commented out, so 
+that it only imports data from input.cnt and input.nrm.
 to make the program run smoother, comment out as well all printed messages in
 the c file.
 '''
