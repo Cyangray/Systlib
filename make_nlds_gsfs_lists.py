@@ -73,9 +73,9 @@ chi2_lim_e = [Sb127_nld_lvl[int(chi2_lim[0]),0], Sb127_nld_lvl[int(chi2_lim[1]),
 chi2_lim_e2 = [Sb127_nld_lvl[int(chi2_lim2[0]),0], Sb127_nld_lvl[int(chi2_lim2[1]),0]]
 
 if load_lists:
-    nlds = np.load('nlds.npy', allow_pickle = True)
-    gsfs = np.load('gsfs.npy', allow_pickle = True)
-    ncrates = np.load('ncrates.npy', allow_pickle = True)
+    nlds = np.load('data/generated/nlds.npy', allow_pickle = True)
+    gsfs = np.load('data/generated/gsfs.npy', allow_pickle = True)
+    ncrates = np.load('data/generated/ncrates.npy', allow_pickle = True)
 else:
     #beginning the big nested loop
     gsfs = []
@@ -147,26 +147,26 @@ else:
                         ncrates.append(curr_ncrate)
                         
     # save lists of nlds and gsfs to file
-    np.save('nlds.npy', nlds)
-    np.save('gsfs.npy', gsfs)
+    np.save('data/generated/nlds.npy', nlds)
+    np.save('data/generated/gsfs.npy', gsfs)
     if astro:
-        np.save('ncrates.npy', ncrates)
+        np.save('data/generated/ncrates.npy', ncrates)
 
 
 valmatrices = [[],[]]
 for lst, lab, i in zip([nlds, gsfs], ['nld','gsf'], [0,1]):
     valmatrices[i] = calc_errors_chis(lst)
     header = 'Energy [MeV], best_fit, best_fit-2*sigma, best_fit-sigma, best_fit+sigma, best_fit+2*sigma' 
-    np.savetxt(lab + '_whole.txt',valmatrices[i], header = header)
+    np.savetxt('data/generated/' + lab + '_whole.txt',valmatrices[i], header = header)
     
 if astro:
     astrovalmatrix = calc_errors_chis(ncrates)
     header = 'T [GK], best_fit, best_fit-2*sigma, best_fit-sigma, best_fit+sigma, best_fit+2*sigma' 
-    np.savetxt('ncrates_whole.txt',astrovalmatrix, header = header)
+    np.savetxt('data/generated/ncrates_whole.txt',astrovalmatrix, header = header)
     
     MACSvalmatrix = calc_errors_chis_MACS(ncrates)
     header = 'kT [keV], best_fit, best_fit-2*sigma, best_fit-sigma, best_fit+sigma, best_fit+2*sigma' 
-    np.savetxt('MACS_whole.txt',MACSvalmatrix, header = header)
+    np.savetxt('data/generated/MACS_whole.txt',MACSvalmatrix, header = header)
     
 
 #Save in best_fits.npy the nld-gsf couple with the least chi2 score
