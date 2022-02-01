@@ -1,0 +1,75 @@
+#---EXFOR Request #46803
+#---EXFOR Standard Output---
+#=============================================================================
+#DATASET        M0660002 
+#NOW            2021/09/15:08:53:12
+#SUBENT         M0660002   20050221
+#ENTRY          M0660      20050221
+#AUTHOR1        J.Magill+
+#YEAR           2003
+#X4REF1         J,APPL/B,77,387,2003
+#REFERENCE1     Jour: Applied Physics B, Vol.77, p.387 (2003)
+#REACTION       53-I-129(G,N)53-I-128,,SIG,,BRS
+#D4REAC         R0#
+#C4Reaction     (G,N),SIG,,BRS
+#ReactionType   CS
+#Quantity       Cross section
+#IndVarFamCode  [0 2        ]
+#ExpectedUnits  [B]
+#xVariables     1
+#+              Y = Y(X1)
+#COLUMNS        2
+#HEADER         7           2           12
+#!DATA        EN          
+#!MB          MEV         
+#!Y.Value     X1.Value    
+#!0.1         1.1         
+#!variable    variable    
+#!0.001       1000000.0   
+#!B           EV          
+#DATA           27          2           12
+ 25.56       9.          
+ 36.92       9.5         
+ 42.6        10.         
+ 51.12       10.5        
+ 61.91       11.         
+ 73.84       11.5        
+ 92.58       12.         
+ 113.6       12.5        
+ 138.88      13.         
+ 170.4       13.5        
+ 197.66      14.         
+ 215.8       14.5        
+ 229.        15.         
+ 206.8       15.5        
+ 184.6       16.         
+ 153.36      16.5        
+ 125.        17.         
+ 102.24      17.5        
+ 88.         18.         
+ 71.         18.5        
+ 59.64       19.         
+ 50.         19.5        
+ 42.46       20.         
+ 35.22       20.5        
+ 31.24       21.         
+ 27.26       21.5        
+ 13.86       22.         
+#ENDDATA        27          2
+#Legend         2           12
+#
+#COL-1         : Data        : variable    
+#+   Rank      : 0.1         : Y.Value     
+#+   Type      : 21          : 0.1         
+#+   Header    : DATA        : [Data: data]
+#+   Units     : MB          : [millibarns]
+#+   BasicUnits: B           : Conv.Factor=0.001
+#
+#COL-2         : Data        : variable    
+#+   Rank      : 1.1         : X1.Value    
+#+   Type      : 41          : 2.1         
+#+   Header    : EN          : [Incident energy: energy]
+#+   Units     : MEV         : [MeV]
+#+   BasicUnits: EV          : Conv.Factor=1.e+06
+#
+#ENDDATASET     M0660002 

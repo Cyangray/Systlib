@@ -1,0 +1,68 @@
+#---EXFOR Request #46775
+#---EXFOR Standard Output---
+#=============================================================================
+#DATASET        G4042002 
+#NOW            2021/09/15:08:02:34
+#SUBENT         G4042002   20131028
+#ENTRY          G4042      20170925
+#AUTHOR1        V.M.Mazur+
+#YEAR           2013
+#X4REF1         J,PR/C,87,044604,2013
+#REFERENCE1     Jour: Physical Review, Part C, Nuclear Physics, Vol.87, p.044604 (2013)
+#REACTION       52-TE-128(G,N)52-TE-127-M/G,,SIG/RAT,,BRA
+#D4REAC         R0#
+#C4Reaction     (G,N),SIG/RAT,,BRA
+#ReactionType   CS
+#Quantity       Cross section ratio
+#IndVarFamCode  [0 2        ]
+#ExpectedUnits  [NO-DIM]
+#xVariables     1
+#+              Y = Y(X1)
+#COLUMNS        3
+#HEADER         7           3           12
+#!DATA        DATA-ERR    EN-MAX      
+#!NO-DIM      NO-DIM      MEV         
+#!Y.Value     Y.Err+-     X1.Max      
+#!0.1         0.911       1.3         
+#!variable    variable    variable    
+#!1.0         1.0         1000000.0   
+#!NO-DIM      NO-DIM      EV          
+#DATA           15          3           12
+ 0.00686     0.0039      10.5        
+ 0.02474     0.0039      11.         
+ 0.0298      0.00447     11.5        
+ 0.06662     0.00669     12.         
+ 0.08673     0.00613     12.5        
+ 0.1147      0.0039      13.5        
+ 0.1242      0.00558     14.         
+ 0.161       0.00557     14.5        
+ 0.1923      0.00557     15.         
+ 0.2107      0.0078      15.5        
+ 0.2336      0.00836     16.         
+ 0.247       0.01114     16.5        
+ 0.256       0.0117      17.         
+ 0.2762      0.01282     19.         
+ 0.3121      0.01895     22.         
+#ENDDATA        15          3
+#Legend         3           12
+#
+#COL-1         : Data        : variable    
+#+   Rank      : 0.1         : Y.Value     
+#+   Type      : 21          : 0.1         
+#+   Header    : DATA        : [Data: data]
+#+   Units     : NO-DIM      : [no Dimensions]
+#
+#COL-2         : Error       : variable    
+#+   Rank      : 0.911       : Y.Err+-     
+#+   Type      : 21          : 0.911       
+#+   Header    : DATA-ERR    : [Uncertainty: +-error]
+#+   Units     : NO-DIM      : [no Dimensions]
+#
+#COL-3         : Data        : variable    
+#+   Rank      : 1.3         : X1.Max      
+#+   Type      : 41          : 2.3         
+#+   Header    : EN-MAX      : [Incident energy: energy] Given:[Maximum]
+#+   Units     : MEV         : [MeV]
+#+   BasicUnits: EV          : Conv.Factor=1.e+06
+#
+#ENDDATASET     G4042002 

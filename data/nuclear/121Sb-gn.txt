@@ -1,0 +1,57 @@
+#---EXFOR Request #46442
+#---EXFOR Standard Output---
+#=============================================================================
+#DATASET        M0273009 
+#NOW            2021/09/14:09:43:23
+#SUBENT         M0273009   20071109
+#ENTRY          M0273      20071109
+#AUTHOR1        L.Katz+
+#YEAR           1951
+#X4REF1         J,CJP,29,518,1951
+#REFERENCE1     Jour: Canadian Journal of Physics, Vol.29, p.518 (1951)
+#REACTION       51-SB-121(G,N)51-SB-120,,SIG,,BRS
+#D4REAC         R0#
+#C4Reaction     (G,N),SIG,,BRS
+#ReactionType   CS
+#Quantity       Cross section
+#IndVarFamCode  [0 2        ]
+#ExpectedUnits  [B]
+#xVariables     1
+#+              Y = Y(X1)
+#COLUMNS        2
+#HEADER         7           2           12
+#!DATA        EN          
+#!MB          MEV         
+#!Y.Value     X1.Value    
+#!0.1         1.1         
+#!variable    variable    
+#!0.001       1000000.0   
+#!B           EV          
+#DATA           9           2           12
+ 57.         10.         
+ 130.        11.         
+ 264.        12.         
+ 470.        13.         
+ 658.        14.         
+ 665.        15.         
+ 591.        16.         
+ 386.        17.         
+ 189.        18.         
+#ENDDATA        9           2
+#Legend         2           12
+#
+#COL-1         : Data        : variable    
+#+   Rank      : 0.1         : Y.Value     
+#+   Type      : 21          : 0.1         
+#+   Header    : DATA        : [Data: data]
+#+   Units     : MB          : [millibarns]
+#+   BasicUnits: B           : Conv.Factor=0.001
+#
+#COL-2         : Data        : variable    
+#+   Rank      : 1.1         : X1.Value    
+#+   Type      : 41          : 2.1         
+#+   Header    : EN          : [Incident energy: energy]
+#+   Units     : MEV         : [MeV]
+#+   BasicUnits: EV          : Conv.Factor=1.e+06
+#
+#ENDDATASET     M0273009 

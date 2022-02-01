@@ -1,0 +1,104 @@
+#---EXFOR Request #52321
+#---EXFOR Standard Output---
+#=============================================================================
+#DATASET        L0042009 
+#NOW            2021/09/27:10:36:41
+#SUBENT         L0042009   970129
+#ENTRY          L0042      970129
+#AUTHOR1        A.Lepretre+
+#YEAR           1976
+#X4REF1         J,NP/A,258,350,76
+#REFERENCE1     Jour: Nuclear Physics, Section A, Vol.258, p.350 (1976)
+#REACTION       (52-TE-128(G,2N)52-TE-126,,SIG)+(52-TE-128(G,2N+P)51-SB-125,,SIG)
+#D4REAC         (R0#)+(R1#)
+#C4Reaction     ((G,2N),SIG)+((G,2N+P),SIG)
+#ReactionType   CS
+#Quantity       Cross section
+#IndVarFamCode  [0 2        ]
+#ExpectedUnits  [B]
+#xVariables     1
+#+              Y = Y(X1)
+#COLUMNS        4
+#HEADER         7           4           12
+#!DATA        DATA-ERR1   DATA-ERR2   EN          
+#!MB          MB          PER-CENT    MEV         
+#!Y.Value     Y.pErr+-    Y.pErr+-    X1.Value    
+#!0.1         0.955       0.955       1.1         
+#!variable    variable    const       variable    
+#!0.001       0.001       1.0         1000000.0   
+#!B           B           PER-CENT    EV          
+#DATA           43          4           12
+ 0.2         6.          7.          14.8        
+ 6.6         6.1         7.          15.07       
+ 15.5        6.19        7.          15.34       
+ 35.7        6.29        7.          15.62       
+ 54.9        6.38        7.          15.89       
+ 63.6        6.48        7.          16.16       
+ 88.         6.57        7.          16.43       
+ 98.9        6.67        7.          16.7        
+ 98.7        6.76        7.          16.97       
+ 113.5       6.86        7.          17.24       
+ 109.6       6.95        7.          17.51       
+ 100.3       7.05        7.          17.78       
+ 115.        7.14        7.          18.05       
+ 93.6        7.24        7.          18.33       
+ 90.2        7.34        7.          18.6        
+ 85.3        7.43        7.          18.87       
+ 92.4        7.53        7.          19.14       
+ 80.4        7.62        7.          19.41       
+ 73.1        7.72        7.          19.68       
+ 72.         7.81        7.          19.95       
+ 71.3        7.91        7.          20.22       
+ 57.         8.          7.          20.49       
+ 51.5        8.1         7.          20.76       
+ 55.7        8.19        7.          21.04       
+ 58.         8.29        7.          21.31       
+ 45.         8.38        7.          21.58       
+ 52.2        8.48        7.          21.85       
+ 55.9        8.57        7.          22.12       
+ 43.5        8.67        7.          22.39       
+ 39.5        8.76        7.          22.66       
+ 38.1        8.86        7.          22.93       
+ 43.         8.95        7.          23.2        
+ 43.7        9.05        7.          23.47       
+ 24.2        9.15        7.          23.75       
+ 45.2        9.24        7.          24.02       
+ 30.4        9.34        7.          24.29       
+ 26.3        9.43        7.          24.56       
+ 33.9        9.53        7.          24.83       
+ 27.1        9.62        7.          25.1        
+ 9.6         9.72        7.          25.37       
+ 24.3        9.81        7.          25.64       
+ -4.4        9.91        7.          25.91       
+ 6.1         10.         7.          26.18       
+#ENDDATA        43          4
+#Legend         4           12
+#
+#COL-1         : Data        : variable    
+#+   Rank      : 0.1         : Y.Value     
+#+   Type      : 21          : 0.1         
+#+   Header    : DATA        : [Data: data]
+#+   Units     : MB          : [millibarns]
+#+   BasicUnits: B           : Conv.Factor=0.001
+#
+#COL-2         : Error       : variable    
+#+   Rank      : 0.955       : Y.pErr+-    
+#+   Type      : 21          : 0.955       
+#+   Header    : DATA-ERR1   : [Uncertainty: +-partial error]
+#+   Units     : MB          : [millibarns]
+#+   BasicUnits: B           : Conv.Factor=0.001
+#
+#COL-3         : Error       : constant    
+#+   Rank      : 0.955       : Y.pErr+-    
+#+   Type      : 21          : 0.955       
+#+   Header    : DATA-ERR2   : [Uncertainty: +-partial error]
+#+   Units     : PER-CENT    : [per-cent]
+#
+#COL-4         : Data        : variable    
+#+   Rank      : 1.1         : X1.Value    
+#+   Type      : 41          : 2.1         
+#+   Header    : EN          : [Incident energy: energy]
+#+   Units     : MEV         : [MeV]
+#+   BasicUnits: EV          : Conv.Factor=1.e+06
+#
+#ENDDATASET     L0042009 
