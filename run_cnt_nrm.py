@@ -43,7 +43,7 @@ L1max = 23
 
 #Variable names:
 #master folder name:
-master_folder = '127Sb-database'
+master_folder = 'Make_dataset/127Sb-database'
 #full adress of modified counting and normalization codes
 counting_code_path = "/home/francesco/oslo-method-software/prog/counting"
 normalization_code_path = "/home/francesco/oslo-method-software/prog/normalization"

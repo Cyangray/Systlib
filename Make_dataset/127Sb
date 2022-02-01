@@ -1,0 +1,13 @@
+projectile n
+element Sb
+mass 126
+energy n0-20.grid
+E1file 51 127 gsfE1.dat
+M1file 51 127 gsfM1.dat
+gnorm 1.
+ldmodel 4
+ptable 51 127 0.0
+ctable 51 127 0.0
+Nlevels 51 127 7
+outgamma y
+astro y
