@@ -98,10 +98,8 @@ for i, TALYS_strength in enumerate(TALYS_strengths):
     doubleaxs[1].plot(TALYS_strength[:,0],TALYS_strength[:,2], color = cmap(i/8), linestyle = stl, label = 'strength %d'%(i+1))
     ax1.plot(TALYS_strength[:,0],TALYS_strength[:,2], color = cmap(i/8), linestyle = stl, label = 'strength %d'%(i+1))
 
-#import GLO parameters for Te and Sn and calculate GLO parameters of 127Sb 
-Te128_par = np.loadtxt('128Te_params_root')
-Sn126_par = np.loadtxt('126Sn_params')
-Sb127_par = (Te128_par + Sn126_par)/2
+#import GLO parameters 127Sb 
+Sb127_par = np.loadtxt('data/generated/127Sb_params')
 
 #plot
 energies = np.linspace(0, 20, 1000)

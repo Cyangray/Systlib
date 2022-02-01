@@ -1,0 +1,4 @@
+Root scripts to fit experimental data to analytical functions.
+fitRoot_gSF_127Sb_oneGauss.cpp takes as input strength.nrm from the gsf with the best fit (b=0.93, L1 = 6, L2 = 9, Gg = 105) and tries to fit the pygmy with a Gaussian, and the GDR with a GLO. The values and errors are then copied manually to Plot-1GaussOg3gaussians_beside.py for plotting.
+fitRoot_gSF_127Sb_3Gauss.cpp does the same, but the pygmy is fitted by two Gaussians, and a third, smaller gaussian tries to fit the small structure at 4MeV.
+fitRoot_gSF_128Te_oneGauss.cpp instead tries to fit the 128Te gsf from Lepretre et al. (saved in strength128Te.nrm) and uses the GLO parameter values later together with the ones inferred for 126Sn in order to guess the GLO parameters values for 127Sb. These values are copied manually to /data/nuclear/128Te_params_root
