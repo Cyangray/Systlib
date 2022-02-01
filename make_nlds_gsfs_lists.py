@@ -176,11 +176,11 @@ nldvals = []
 gsfvals = []
 
 for el in nlds:
-    nldchis.append(nld.chi2)
-    nldvals.append(nld.y[energy_bin])
+    nldchis.append(el.chi2)
+    nldvals.append(el.y[energy_bin])
 for el in gsfs:
-    gsfchis.append(gsf.chi2)
-    gsfvals.append(gsf.y[energy_bin])
+    gsfchis.append(el.chi2)
+    gsfvals.append(el.y[energy_bin])
     
 nldchi_argmin = np.argmin(nldchis)
 gsfchi_argmin = np.argmin(gsfchis)
