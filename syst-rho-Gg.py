@@ -3,7 +3,7 @@
 '''
 Created on Fri Aug 20 11:52:45 2021
 
-@author: francesco, last modified 31st January 2022
+@author: francesco, last modified 1st February 2022
 
 Code to find the level density at separation energy and the <Gamma_gamma> value 
 for 127Sb by comparing to neighbouring nuclei.
@@ -22,13 +22,11 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import scipy.optimize as sc
 from sklearn.linear_model import LinearRegression
-import sys
-from systlib import *
-sys.path.insert(1, '/home/francesco/Documents/Talys-calculations')
-from readlib import *
+from systlib import ToLatex
+from readlib import Z2Name
 
 #what to fit? 'rho' or 'Gg'
-What_fit = 'rho'
+What_fit = 'Gg'
 #if 'Gg': choose what to have on the x axis
 Gg_axis = 'A'
 #if 'Gg': calculate average? 'Mugh', 'RIPL' or 'both'
@@ -50,11 +48,11 @@ fit_with='Mugh'
 
 
 #import resonance data from RIPL
-RIPL = np.genfromtxt('resonances0.dat', skip_header=125, max_rows=16)
+RIPL = np.genfromtxt('data/nuclear/resonances0.dat', skip_header=125, max_rows=16)
 #Matrix with the neutron pairing energy, to be subtracted from the separation 
 #energy of neutron-even nuclei in order to be able to compare their NLD at Sn 
 #to the neutron-odd nuclei
-dn_matr = np.loadtxt('doba_delta_n.dat')
+dn_matr = np.loadtxt('data/nuclear/doba_delta_n.dat')
 
 #create dataframe with nuclear data.
 #MughD0 + uncertainty are taken from Mughabghab. RhoMugh and uncertainty calculated with d2rho

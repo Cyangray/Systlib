@@ -3,17 +3,15 @@
 """
 Created on Sat Nov  6 17:15:38 2021
 
-@author: francesco, updated 31st January 2022
+@author: francesco, updated 1st February 2022
 
 Draw nld and gsf from the nld_whole.txt and gsf_whole.txt files produced from make_nlds_gsfs_lists.py
 """
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
-import sys
-sys.path.insert(1, '/home/francesco/Documents/Talys-calculations')
-from readlib import *
-from systlib import *
+from readlib import readstrength
+from systlib import import_ocl
 
 #parameters. play with these
 L1max = 23
@@ -36,8 +34,8 @@ ranges = [[-1,6], [np.log10(5e-9),-6]]
 database_path = 'Make_dataset/127Sb-database/'
 
 #import experimental nld and gsf
-nld_mat = np.genfromtxt('nld_whole.txt', unpack = True).T
-gsf_mat = np.genfromtxt('gsf_whole.txt', unpack = True).T
+nld_mat = np.genfromtxt('data/generated/nld_whole.txt', unpack = True).T
+gsf_mat = np.genfromtxt('data/generated/gsf_whole.txt', unpack = True).T
 #delete rows with nans
 nld_mat = nld_mat[~np.isnan(nld_mat).any(axis=1)]
 gsf_mat = gsf_mat[~np.isnan(gsf_mat).any(axis=1)]

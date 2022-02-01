@@ -3,12 +3,12 @@
 """
 Created on Mon Jan 31 21:35:23 2022
 
-@author: francesco
+@author: francesco, updated 1st February 2022
 
 Produce a file in the strength.nrm format to be red by the root fitting algorithm
 """
 
-from systlib import *
+from systlib import load_known_gsf
 from sklearn.linear_model import LinearRegression
 import numpy as np
 
@@ -28,4 +28,4 @@ for i in range(102):
     else:
         strength_arr.append(Te128.yerr[i-52])
         
-np.savetxt('strength128Te.nrm',strength_arr, fmt = '  %.7e')
+np.savetxt('data/generated/strength128Te.nrm',strength_arr, fmt = '  %.7e')

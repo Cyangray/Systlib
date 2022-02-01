@@ -736,13 +736,13 @@ def load_known_gsf(A,Z,lab=''):
     if nucleus == '129I':
         return gsf('129I-gn.txt', label = 'I129', energycol = 1, xscol = 0)
     elif (Z2Name(Z) == 'Sn') and (A in (112,114,116,118,120,124)) and Darmstadt:
-        return gsf('../Tin/Darmstadt/' + str(int(A)) + 'Sn_Total_GSF_Darmstadt.dat', label = nucleus, energycol = 0, xscol = 1, errcol = 2, is_sigma = False)
+        return gsf('data/nuclear/Tin/Darmstadt/' + str(int(A)) + 'Sn_Total_GSF_Darmstadt.dat', label = nucleus, energycol = 0, xscol = 1, errcol = 2, is_sigma = False)
     elif (Z2Name(Z) == 'Sn') and (A in (120,124)) and Oslo:
-        return gsf('../Tin/Oslo/' + str(int(A)) + 'Sn_GSF.txt', label = 'Sn' + str(int(A)) + '_o', energycol = 0, xscol = 1, errcol = [3,2], is_sigma = False)
+        return gsf('data/nuclear/Tin/Oslo/' + str(int(A)) + 'Sn_GSF.txt', label = 'Sn' + str(int(A)) + '_o', energycol = 0, xscol = 1, errcol = [3,2], is_sigma = False)
     elif (Z2Name(Z) == 'Te') and (A == 128):
-        Te128_n = gsf('../Systematics/128Te-gn3.txt', label = 'Te128_n', energycol = 3, xscol = 0, errcol = 1)
-        Te128_2n = gsf('../Systematics/128Te-gn3-2n.txt', label = 'Te128_2n', energycol = 3, xscol = 0, errcol = 1)
-        Te128 = gsf('../Systematics/128Te-gn3-2n.txt', label='Te128', energycol = 3, xscol = 0, errcol = 1)
+        Te128_n = gsf('data/nuclear/128Te-gn3.txt', label = 'Te128_n', energycol = 3, xscol = 0, errcol = 1)
+        Te128_2n = gsf('data/nuclear/128Te-gn3-2n.txt', label = 'Te128_2n', energycol = 3, xscol = 0, errcol = 1)
+        Te128 = gsf('data/nuclear/128Te-gn3-2n.txt', label='Te128', energycol = 3, xscol = 0, errcol = 1)
         #unite Te128_n and Te128_2n into Te128
         for i, energy in enumerate(Te128_2n.energies):
             index = np.where(Te128_n.energies == energy)[0]
@@ -835,10 +835,11 @@ def log_interp1d(xx, yy, **kwargs):
     log_interp = lambda zz: np.exp(lin_interp(zz))
     return log_interp
 
+'''
 def gen_GDR(min_energy = 0.1):
     #import GLO parameters for Te and Sn
-    Te128_par = np.loadtxt('../Systematics/128Te_params')
-    Sn126_par = np.loadtxt('../Systematics/126Sn_params')
+    Te128_par = np.loadtxt('data/nuclear/128Te_params_root')
+    Sn126_par = np.loadtxt('data/nuclear/126Sn_params')
     
     #Calculate GLO parameters of 127Sb as the average of Te and Sn
     Sb127_par = (Te128_par + Sn126_par)/2
@@ -846,6 +847,7 @@ def gen_GDR(min_energy = 0.1):
     energies = np.arange(min_energy, 30.1, 0.1)
     GDR = GLO(energies, Sb127_par[3], Sb127_par[0], Sb127_par[1], Sb127_par[2])
     return energies, GDR
+'''
 
 def make_E1_M1_files(gsf_folder_path, Sn, A, Z, a0, a1, M1_frac = 0.1, filename = 'strength.nrm', target_folder = None, high_energy_interp=None):
     '''

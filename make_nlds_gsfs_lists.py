@@ -24,10 +24,7 @@ if astro = True), and:
 
 import numpy as np
 import matplotlib.pyplot as plt
-import sys
-sys.path.insert(1, '/home/francesco/Documents/Talys-calculations')
-#from readlib import *
-from systlib import *
+from systlib import import_ocl, nld, gsf, import_Bnorm, astrorate, import_Anorm_alpha, chisquared, flat_distr_chi2_fade, calc_errors_chis, calc_errors_chis_MACS
 
 
 #parameters. play with these
@@ -178,10 +175,10 @@ gsfchis = []
 nldvals = []
 gsfvals = []
 
-for nld in nlds:
+for el in nlds:
     nldchis.append(nld.chi2)
     nldvals.append(nld.y[energy_bin])
-for gsf in gsfs:
+for el in gsfs:
     gsfchis.append(gsf.chi2)
     gsfvals.append(gsf.y[energy_bin])
     

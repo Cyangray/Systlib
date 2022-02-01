@@ -17,7 +17,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import lmfit
 from sklearn.linear_model import LinearRegression
-from systlib import *
+from systlib import load_known_gsf, gauss, GLO, f_fit_total, f_residuals
 
 #Import the tins nuclei (objects already made in systlib.py) and initialize lists
 As = np.array([112, 114, 116, 118, 120, 124])
@@ -175,7 +175,7 @@ for i,data in enumerate(datas):
     ax.plot(126,datapoint,colors[i] + 'o',mfc=None)
     output += str(datapoint) + '\n'
 
-np.savetxt('126Sn_params',output_matr,header = '# E, Gamma, sigma, T')
+np.savetxt('data/generated/126Sn_params',output_matr,header = '# E, Gamma, sigma, T')
 
 ax.grid()
 ax.legend()

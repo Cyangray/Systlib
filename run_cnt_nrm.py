@@ -48,11 +48,6 @@ master_folder = 'Make_dataset/127Sb-database'
 counting_code_path = "/home/francesco/oslo-method-software/prog/counting"
 normalization_code_path = "/home/francesco/oslo-method-software/prog/normalization"
 
-
-
-
-
-
 def rho2D(rho, target_spin, spin_cutoff):
     '''
     calculate D from rho at Bn (Larsen et al. 2011, eq. (20))
@@ -78,8 +73,7 @@ for b in blist:
     new_D_str = '{:.6f}'.format(new_D)
     new_dir_rho = bstr + '-' + str(int(new_rho))
     os.mkdir(new_dir_rho)
-    os.chdir(new_dir_rho)
-    
+    os.chdir(new_dir_rho) 
     for L1n in range(1,L1max):
         L1 = str(L1n)
         if L1n == 1:
@@ -96,30 +90,24 @@ for b in blist:
             os.system('cp ../../../sigsp.rsg sigsp.rsg')
             os.system('cp ../../../rhopaw.rsg rhopaw.rsg')
             os.system('cp ../../../sigpaw.rsg sigpaw.rsg')
-            
             newinput_cnt = ' 127.000000 1.847000 8.380000 ' + new_rho_str +' 90000.000000 \n ' + L1 + ' ' + L2 + ' 43 49 \n 12 17 54 59 \n 1 12.353000 -0.452000 \n 2 0.800000 -1.723957 \n 1 \n 0 -2.689502 2.672232 \n 0 -0.099645 11.078947 \n 1.000000 \n 0.500000 1.000242 -1.000000 1.000498 \n 300.000000 '
             with open('input.cnt', 'w') as write_obj:
                 write_obj.write(newinput_cnt)
             call([counting_code_path])
-
-            
             for Gg in Gglist:
                 Ggstr = str(int(Gg))
                 Gg_input_str = '{:.6f}'.format(Gg)
                 os.mkdir(Ggstr)
                 os.chdir(Ggstr)
-                
                 os.system('cp ../rhosp.rsg rhosp.rsg')
                 os.system('cp ../rhotmopaw.cnt rhotmopaw.cnt')
                 os.system('cp ../sigextpaw.cnt sigextpaw.cnt')
                 os.system('cp ../spincut.cnt spincut.cnt')
                 os.system('cp ../sigpaw.cnt sigpaw.cnt')
                 os.system('cp ../input.cnt input.cnt')
-                
                 newinput_nrm = ' 0 8.380000 8.000000 \n ' + new_D_str + ' ' + Gg_input_str + ' \n 105.000000 150.000000 '
                 with open('input.nrm', 'w') as write_obj:
                     write_obj.write(newinput_nrm)
-                
                 call([normalization_code_path]);
                 os.system('rm rhosp.rsg')
                 os.system('rm rhotmopaw.cnt')
@@ -128,7 +116,6 @@ for b in blist:
                 os.system('rm sigpaw.cnt')
                 os.system('rm input.cnt')
                 os.chdir('..')
-                
                 
             os.system('rm counting.dat')
             os.system('rm rhosp.rsg')
