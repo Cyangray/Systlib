@@ -30,7 +30,7 @@ a1 = 0.1562
 sig = 0.341
 limit_points = np.linspace(0.0,1.0,21)
 
-ranges = [[-1,6], [np.log10(5e-9),-6]]
+ranges = [[-1,6], [np.log10(6e-9),np.log10(3.5e-7)]]
 database_path = 'Make_dataset/127Sb-database/'
 
 #import experimental nld and gsf
@@ -54,6 +54,7 @@ TALYS_strengths = [readstrength(51, 127, 1, 1, strength, 1) for strength in rang
 
 #start plotting
 cmap = matplotlib.cm.get_cmap('Dark2')
+cmap = matplotlib.cm.get_cmap('YlGnBu')
 fig,doubleaxs = plt.subplots(nrows = 1, ncols = 2)
 fig0,ax0 = plt.subplots()
 fig1,ax1 = plt.subplots()
@@ -93,10 +94,14 @@ for doubleax, singleax, val_matrix in zip(doubleaxs, singleaxs, [nld_mat, gsf_ma
         ax.set_yscale('log')
 
 #plot TALYS strengths
+stls = ['-','--','-.',':','-','--','-.',':']
 for i, TALYS_strength in enumerate(TALYS_strengths):
-    stl = '--'
-    doubleaxs[1].plot(TALYS_strength[:,0],TALYS_strength[:,2], color = cmap(i/8), linestyle = stl, label = 'strength %d'%(i+1))
-    ax1.plot(TALYS_strength[:,0],TALYS_strength[:,2], color = cmap(i/8), linestyle = stl, label = 'strength %d'%(i+1))
+    if i<4:
+        col = 3
+    else:
+        col = 8
+    doubleaxs[1].plot(TALYS_strength[:,0],TALYS_strength[:,2], color = cmap(col/8), linestyle = stls[i], alpha = 0.8, label = 'strength %d'%(i+1))
+    ax1.plot(TALYS_strength[:,0],TALYS_strength[:,2], color = cmap(col/8), linestyle = stls[i], alpha = 0.8, label = 'strength %d'%(i+1))
 
 #import GLO parameters 127Sb 
 Sb127_par = np.loadtxt('data/generated/127Sb_params')

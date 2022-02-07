@@ -12,7 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 #import sys
 #sys.path.insert(1, '/home/francesco/Documents/Talys-calculations')
-from readlib import readreaclib, nonsmoker, Z2Name, rate2MACS, readastro, xs2MACS
+from readlib import readreaclib, nonsmoker, Z2Name, rate2MACS, readastro, xs2MACS, xs2rate
 from systlib import ToLatex
 import pandas as pd
 import matplotlib
@@ -26,6 +26,7 @@ strength = [1,2,3,4,5,6,7,8]    #Which strength function to read - numbers from 
 nld = [1,2,3,4,5,6]
 mass = [1,2,3]
 errorbars = False
+rates = True
 Sb127_mass = 125.907247480 #in a.u.
 
 #constants
@@ -36,66 +37,103 @@ T9range = np.array([0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.5,
 T9extrange = np.array([0.01, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.5, 2.0, 3.5, 4.0, 4.5, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0])
 keVrange = T9extrange*k_B
 
-#Make REACLIB MACS
-a = readreaclib(nucleus, A, reaclib_file = 'data/ncapture/reaclib')
-ncrate_reaclib = nonsmoker(a, T9range)
-MACS_reaclib = rate2MACS(ncrate_reaclib,Sb127_mass,T9range)
+
 
 #Make TALYS uncertainty span
 dummyastro = readastro(nucleus, A, nld[0], mass[0], strength[0], omp[0])
-maxMACS = np.zeros_like(dummyastro[:,2])
-minMACS = dummyastro[:,2].copy()
+if rates:    
+    val_index = 1
+else:
+    val_index = 2
+max_val = np.zeros_like(dummyastro[:,val_index])
+min_val = dummyastro[:,val_index].copy()
 for ld in nld:
     for m in mass:
         for s in strength:
             for o in omp:
                 currentastro = readastro(nucleus, A, ld, m, s, o)
                 alpha = 0.2
-                for i,MACS in enumerate(currentastro[:,2]):
-                    if MACS > maxMACS[i]:
-                        maxMACS[i] = MACS
-                    if MACS < minMACS[i]:
-                        minMACS[i] = MACS
+                for i,val in enumerate(currentastro[:,val_index]):
+                    if val > max_val[i]:
+                        max_val[i] = val
+                    if val < min_val[i]:
+                        min_val[i] = val
                     
 #Import Oslo data
-MACS_mat = np.genfromtxt('data/generated/MACS_whole.txt', unpack = True).T
+if rates:
+    Oslo_mat = np.genfromtxt('data/generated/ncrates_whole.txt', unpack = True).T
+    x_Oslo = Oslo_mat[:,0]
+else:
+    Oslo_mat = np.genfromtxt('data/generated/MACS_whole.txt', unpack = True).T
+    x_Oslo = Oslo_mat[:,0]*k_B #keV
+
 
 #Import other models
+a = readreaclib(nucleus, A, reaclib_file = 'data/ncapture/reaclib')
+val_reaclib = nonsmoker(a, T9range) #rates
 tendl_data = np.loadtxt('data/ncapture/tendl_ng_rates.tot')
-rates_bruslib = np.loadtxt('data/ncapture/bruslib-126Sb')
-other_rates_df = pd.read_csv('data/ncapture/MACS_from_libs.txt', sep='	', header = 1)
-models = [other_rates_df[other_rates_df['modn']==j] for j in range(1,7)]
-MACS_tendl = xs2MACS(tendl_data[:,0]*1e3,tendl_data[:,1])
-kTs = MACS_mat[:,0]*k_B #keV
+mat_bruslib = np.loadtxt('data/ncapture/bruslib-126Sb')
+other_libs_df = pd.read_csv('data/ncapture/MACS_from_libs.txt', sep='	', header = 1)
+models = [other_libs_df[other_libs_df['modn']==j] for j in range(1,7)]
+if rates:
+    x_reaclib = T9range
+    x_TENDL = tendl_data[:,0]*1e3/k_B
+    val_TENDL = xs2rate(tendl_data[:,0]*1e3,tendl_data[:,1],Sb127_mass,Ts=x_TENDL)
+    x_bruslib = mat_bruslib[:,0]
+    val_bruslib = mat_bruslib[:,1]
+else:
+    x_reaclib = T9range*k_B
+    val_reaclib = rate2MACS(val_reaclib,Sb127_mass,T9range)
+    x_TENDL = tendl_data[:,0]*1e3
+    val_TENDL = xs2MACS(x_TENDL,tendl_data[:,1],Ts = x_TENDL/k_B)
+    x_bruslib = mat_bruslib[:,0]*k_B
+    val_bruslib = rate2MACS(mat_bruslib[:,1],Sb127_mass,mat_bruslib[:,0])
 
 #plot figure
 cmap = matplotlib.cm.get_cmap('YlGnBu')
 fig, ax = plt.subplots()
-ax.fill_between(kTs, minMACS, maxMACS, color = cmap(1/8), alpha = 1, label = 'TALYS uncertainty span')
+ax.fill_between(x_Oslo, min_val, max_val, color = cmap(1/8), alpha = 1, label = 'TALYS uncertainty span')
 if errorbars:
-    lower_err = MACS_mat[:,1] - MACS_mat[:,3]
-    upper_err = MACS_mat[:,-2] - MACS_mat[:,1]
-    ax.errorbar(kTs, MACS_mat[:,1],yerr=[lower_err, upper_err],ecolor='k')
+    lower_err = Oslo_mat[:,1] - Oslo_mat[:,3]
+    upper_err = Oslo_mat[:,-2] - Oslo_mat[:,1]
+    ax.errorbar(x_Oslo, Oslo_mat[:,1],yerr=[lower_err, upper_err],ecolor='k')
 else:
-    ax.fill_between(kTs, MACS_mat[:,2], MACS_mat[:,5], color = cmap(2/8), alpha= 1, label = r'Oslo data, $2\sigma$')
-    ax.fill_between(kTs, MACS_mat[:,3], MACS_mat[:,4], color = cmap(3/8), alpha= 1, label = r'Oslo data, $1\sigma$')
-    ax.plot(kTs, MACS_mat[:,1], color = 'b', linestyle ='-', label = 'Oslo data')
+    ax.fill_between(x_Oslo, Oslo_mat[:,2], Oslo_mat[:,5], color = cmap(2/8), alpha= 1, label = r'Oslo data, $2\sigma$')
+    ax.fill_between(x_Oslo, Oslo_mat[:,3], Oslo_mat[:,4], color = cmap(3/8), alpha= 1, label = r'Oslo data, $1\sigma$')
+    ax.plot(x_Oslo, Oslo_mat[:,1], color = 'b', linestyle ='-', label = 'Oslo data')
 
 for i, model in enumerate(models):
     label = model['model'].iloc[0]
     label = label[:-1]
-    matr = model[['kT','MACS']].to_numpy()
+    if rates:
+        matr = model[['kT','ngamma']].to_numpy()
+        x_libs = matr[:,0]/k_B
+    else:
+        matr = model[['kT','MACS']].to_numpy()
+        x_libs = matr[:,0]
     if i==0:
-        ax.plot(matr[:,0], matr[:,1], color = cmap(5/8), linestyle = '-.', label=label)
-ax.plot(T9range*k_B, MACS_reaclib, color = 'k', linestyle = '--',label = 'JINA REACLIB')
-ax.plot(keVrange, MACS_tendl, color = 'tab:brown', linestyle = '-.',label = 'TENDL')
-ax.plot(rates_bruslib[:,0]*k_B, rate2MACS(rates_bruslib[:,1],Sb127_mass,rates_bruslib[:,0]), color = cmap(8/8), linestyle = ':', label = 'BRUSLIB')
-ax.set_title('MACS for '+ ToLatex(str(A) + Z2Name(nucleus)) + '$(n,\gamma)$')
-ax.set_xlabel(r'$k_B$ $T$ [keV]')
-ax.set_ylabel('MACS [mb]')
-#ax.grid()
-ax.set_yscale('log')
-ax.set_xlim([-2,110])
-ax.set_ylim([50,14e3])
-ax.legend(ncol=2)        
+        ax.plot(x_libs, matr[:,1], color = cmap(5/8), linestyle = '-.', label=label)
+
+ax.plot(x_reaclib, val_reaclib, color = 'k', linestyle = '--',label = 'JINA REACLIB')
+ax.plot(x_TENDL, val_TENDL, color = 'tab:brown', linestyle = '-.',label = 'TENDL')
+ax.plot(x_bruslib, val_bruslib, color = cmap(8/8), linestyle = ':', label = 'BRUSLIB')
+
+if rates:
+    ax.set_title(r'rates for '+ ToLatex(str(A) + Z2Name(nucleus)) + '$(n,\gamma)$')
+    ax.set_xlabel(r'$T$ [GK]')
+    ax.set_ylabel(r'$(n,\gamma)$ rate [cm$^{3}$mol$^{-1}$s$^{-1}$]')
+    #ax.grid()
+    ax.set_yscale('log')
+    ax.set_xlim([-0.1,110/k_B])
+    ax.set_ylim([3e6,1.3e9])
+    ax.legend(ncol=2)
+else:
+    ax.set_title('MACS for '+ ToLatex(str(A) + Z2Name(nucleus)) + '$(n,\gamma)$')
+    ax.set_xlabel(r'$k_B$ $T$ [keV]')
+    ax.set_ylabel('MACS [mb]')
+    #ax.grid()
+    ax.set_yscale('log')
+    ax.set_xlim([-2,110])
+    ax.set_ylim([50,14e3])
+    ax.legend(ncol=2)
 fig.show()

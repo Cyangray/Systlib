@@ -166,13 +166,13 @@ def search_string_in_file(file_name, string_to_search):
 
 def readstrength(nucleus, A, ldmodel, massmodel, strength, omp):
     #read the strength function from the gsf.txt mashup file
-    filepath = 'data/TALYS/' + ZandAtoName(A,nucleus) + 'gsf.txt'
+    filepath = 'data/TALYS/' + ZandAtoName(A,nucleus) + '/gsf.txt'
     rowsskip = 83* ( ((ldmodel-1)*3*8*2) + ((massmodel-1)*8*2) + ((strength-1)*2) + ((omp-1)) )
     return np.loadtxt(filepath, skiprows = (rowsskip + 2), max_rows = 81)
 
 def readastro(nucleus, A, ldmodel, massmodel, strength, omp):
     #read the astrorate from the ncrates.txt mashup file
-    filepath = 'data/TALYS/' + ZandAtoName(A,nucleus) + 'ncrates.txt' 
+    filepath = 'data/TALYS/' + ZandAtoName(A,nucleus) + '/ncrates.txt' 
     rowsskip = 33* ( ((ldmodel-1)*3*8*2) + ((massmodel-1)*8*2) + ((strength-1)*2) + ((omp-1)) )
     ncrates = np.loadtxt(filepath, skiprows = (rowsskip + 3), max_rows = 30)
     return np.delete(ncrates, [0,1,2,3], 0) #delete first four rows
