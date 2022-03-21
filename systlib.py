@@ -9,15 +9,15 @@ Created on Tue Oct  5 15:48:24 2021
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import to_rgba
-import sys
+#import sys
 import math
 # insert at 1, 0 is the script path (or '' in REPL)
-sys.path.insert(1, '/home/francesco/Documents/Talys-calculations')
+#sys.path.insert(1, '/home/francesco/Documents/Talys-calculations')
 from readlib import *
 import lmfit
 from sklearn.linear_model import LinearRegression
 from scipy.interpolate import interp1d
-
+from convert_talys import gen_nld_table
 
 #convertion factor?
 k_C = 1.439996 #e^2*fm*MeV
@@ -31,7 +31,7 @@ def sigma2f(sigma, E_g):
     return const*sigma/E_g
 
 def SLO(E, T, E0, Gamma0, sigma0):
-	# Special Lorentzian, adapted from Kopecky & Uhl (1989) eq. (2.1)
+	# Standard Lorentzian, adapted from Kopecky & Uhl (1989) eq. (2.1)
 	funct = const * sigma0 * E * Gamma0**2 / ( (E**2 - E0**2)**2 + E**2 * Gamma0**2 )
 	return funct
 
@@ -51,6 +51,11 @@ def upbend(E, T, a_up, C, sigma):
 
 def upbend_draw(E,C,a_up):
     return C*np.exp(a_up*E)
+
+def SLO_simple(E, E0, Gamma0, sigma0):
+	# Standard Lorentzian, adapted from Kopecky & Uhl (1989) eq. (2.1)
+	funct = const * sigma0 * E * Gamma0**2 / ( (E**2 - E0**2)**2 + E**2 * Gamma0**2 )
+	return funct
 
 def PDR_to_MeVbarn(C,sigma,E0):
     #assumes PDR described by Gaussian
@@ -597,14 +602,14 @@ class gsf:
                 clean_E.append(E)
                 clean_y.append(y)
                 clean_yerr.append(yerr)
-        self.energies = np.array(clean_E)
+        self.energies = self.x = np.array(clean_E)
         self.y = np.array(clean_y)
         self.yerr = np.array(clean_yerr)
         self.yerrplot = self.yerr
     
     def delete_point(self, position):
         self.y = np.delete(self.y, position)
-        self.energies = np.delete(self.energies, position)
+        self.energies = self.x = np.delete(self.energies, position)
         self.yerr = np.delete(self.yerr, position)
         self.yerrplot = np.delete(self.yerrplot, position)
         
@@ -659,13 +664,19 @@ class nld:
         clean_y = []
         clean_yerr = []
         for E, y, yerr in zip(self.energies, self.y, self.yerr):
-            if not y == np.NaN:
+            if not math.isnan(y):
                 clean_E.append(E)
                 clean_y.append(y)
                 clean_yerr.append(yerr)
-        self.energies = np.array(clean_E)
+        self.energies = self.x = np.array(clean_E)
         self.y = np.array(clean_y)
         self.yerr = np.array(clean_yerr)
+        
+    def delete_point(self, position):
+        self.y = np.delete(self.y, position)
+        self.energies = self.x = np.delete(self.energies, position)
+        self.yerr = np.delete(self.yerr, position)
+        #self.yerrplot = np.delete(self.yerrplot, position)
     
     def plot(self, ax = 0, alpha = 1, ploterrors = True, color = '', style = 'o', label = None):
         if label is None:
@@ -703,7 +714,7 @@ class astrorate:
             plt.plot(self.T, y, color+style, alpha = alpha, label = self.label)
 
 
-def load_known_gsf(A,Z,lab=''):
+def load_known_gsf(A,Z,lab='', nature = 'E1'):
     '''
     function to load the gsf of a nucleus
     TODO: get path as input and override the hard-coded one
@@ -716,6 +727,8 @@ def load_known_gsf(A,Z,lab=''):
         element number, or element name
     lab : str, optional
         'oslo' if data from Oslo, 'darmstadt' if data from Darmstadt. 'o' and 'd' also work. The default is ''.
+    nature : str, optional
+        'E1' default, M1 can be chosen if lab = Darmstadt
 
     Returns
     -------
@@ -732,11 +745,15 @@ def load_known_gsf(A,Z,lab=''):
     elif (lab=='darmstadt') or (lab=='Darmstadt') or (lab=='d'):
         nucleus = nucleus +'_d'
         Darmstadt = True
+        if nature == 'M1':
+            nucleus = nucleus + '_M1'
     
     if nucleus == '129I':
         return gsf('129I-gn.txt', label = 'I129', energycol = 1, xscol = 0)
-    elif (Z2Name(Z) == 'Sn') and (A in (112,114,116,118,120,124)) and Darmstadt:
+    elif (Z2Name(Z) == 'Sn') and (A in (112,114,116,118,120,124)) and Darmstadt and nature=='E1':
         return gsf('data/nuclear/Tin/Darmstadt/' + str(int(A)) + 'Sn_Total_GSF_Darmstadt.dat', label = nucleus, energycol = 0, xscol = 1, errcol = 2, is_sigma = False)
+    elif (Z2Name(Z) == 'Sn') and (A in (112,114,116,118,120,124)) and Darmstadt and nature=='M1':
+        return gsf('data/nuclear/Tin/Darmstadt/' + str(int(A)) + 'Sn_dBM1dE_Darmstadt.dat', label = nucleus, energycol = 0, xscol = 1, errcol = 2, is_sigma = True)
     elif (Z2Name(Z) == 'Sn') and (A in (120,124)) and Oslo:
         return gsf('data/nuclear/Tin/Oslo/' + str(int(A)) + 'Sn_GSF.txt', label = 'Sn' + str(int(A)) + '_o', energycol = 0, xscol = 1, errcol = [3,2], is_sigma = False)
     elif (Z2Name(Z) == 'Te') and (A == 128):
@@ -849,7 +866,62 @@ def gen_GDR(min_energy = 0.1):
     return energies, GDR
 '''
 
-def make_E1_M1_files(gsf_folder_path, Sn, A, Z, a0, a1, M1_frac = 0.1, filename = 'strength.nrm', target_folder = None, high_energy_interp=None):
+def make_E1_M1_files_simple(energies, values, Z, A, M1 = 0.1, target_folder = None, high_energy_interp=None):
+    '''
+    Function that takes the energies and the values of gsf and writes two tables 
+    for both E1 and M1 ready to be taken as input by TALYS.
+    '''
+    gsf = np.c_[energies,values]
+    if high_energy_interp is not None:
+        gsf = np.vstack((gsf,high_energy_interp))
+    
+    gsf_folder_path = ''
+    if target_folder is not None:
+        if target_folder != '':
+            if target_folder[-1] != '/':
+                target_folder = target_folder + '/'
+        gsf_folder_path = target_folder
+    
+    fn_gsf_outE1 = gsf_folder_path + "gsfE1.dat"
+    fn_gsf_outM1 = gsf_folder_path + "gsfM1.dat"
+    
+    # The file is/should be writen in [MeV] [MeV^-3] [MeV^-3]
+    if gsf[0, 0] == 0:
+        gsf = gsf[1:, :]
+    Egsf = gsf[:, 0]
+    
+    if isinstance(M1,float):
+        method = 'frac'
+    elif isinstance(M1, list):
+        method = 'SLO'
+    
+    if method == 'frac':
+        gsfE1 = gsf[:, 1]*(1-M1)
+        gsfM1 = gsf[:, 1]*M1
+    elif method =='SLO':
+        M1_vals = SLO_simple(gsf[:,0],M1[0], M1[1], M1[2])
+        gsfE1 = gsf[:,1] - M1_vals
+        gsfM1 = M1_vals
+
+    # REMEMBER that the TALYS functions are given in mb/MeV (Goriely's tables)
+    # so we must convert it (simple factor)
+    factor_from_mb = 8.6737E-08   # const. factor in mb^(-1) MeV^(-2)
+    
+    fE1 = log_interp1d(Egsf, gsfE1, fill_value="extrapolate")
+    fM1 = log_interp1d(Egsf, gsfM1, fill_value="extrapolate")
+    
+    Egsf_out = np.arange(0.1, 30.1, 0.1)
+    
+    header = f" Z=  {Z} A=  {A}\n" + "  U[MeV]  fE1[mb/MeV]"
+    # gsfE1 /= factor_from_mb
+    np.savetxt(fn_gsf_outE1, np.c_[Egsf_out, fE1(Egsf_out)/factor_from_mb],
+               fmt="%9.3f%12.3E", header=header)
+    # gsfM1 /= factor_from_mb
+    np.savetxt(fn_gsf_outM1, np.c_[Egsf_out, fM1(Egsf_out)/factor_from_mb],
+               fmt="%9.3f%12.3E", header=header)
+    return Egsf_out, fE1(Egsf_out)/factor_from_mb
+
+def make_E1_M1_files(gsf_folder_path, Sn, A, Z, a0, a1, M1 = 0.1, filename = 'strength.nrm', target_folder = None, high_energy_interp=None):
     '''
     Function that takes the path of a Oslo Method generated gsf with energy in the first column and 
     the gsf in the second, and writes two tables for both E1 and M1 ready to be taken
@@ -871,21 +943,42 @@ def make_E1_M1_files(gsf_folder_path, Sn, A, Z, a0, a1, M1_frac = 0.1, filename 
     if high_energy_interp is not None:
         gsf = np.vstack((gsf,high_energy_interp))
     
-    if target_folder is not None:
-        if target_folder != '':
-            if target_folder[-1] != '/':
-                target_folder = target_folder + '/'
-        gsf_folder_path = target_folder
+    if target_folder is None:
+        tf = ''
+    elif target_folder == '':
+        tf = ''
+    else:
+        if target_folder[-1] != '/':
+            tf = target_folder + '/'
+        else:
+            tf = target_folder
     
-    fn_gsf_outE1 = gsf_folder_path + "gsfE1.dat"
-    fn_gsf_outM1 = gsf_folder_path + "gsfM1.dat"
+    #if target_folder is not None:
+    #    if target_folder != '':
+    #        if target_folder[-1] != '/':
+    #            target_folder = target_folder + '/'
+    #    gsf_folder_path = target_folder
+    
+    fn_gsf_outE1 = tf + "gsfE1.dat"
+    fn_gsf_outM1 = tf + "gsfM1.dat"
     
     # The file is/should be writen in [MeV] [MeV^-3] [MeV^-3]
     if gsf[0, 0] == 0:
         gsf = gsf[1:, :]
     Egsf = gsf[:, 0]
-    gsfE1 = gsf[:, 1]*(1-M1_frac)
-    gsfM1 = gsf[:, 1]*M1_frac
+    
+    if isinstance(M1,float):
+        method = 'frac'
+    elif isinstance(M1, list):
+        method = 'SLO'
+    
+    if method == 'frac':
+        gsfE1 = gsf[:, 1]*(1-M1)
+        gsfM1 = gsf[:, 1]*M1
+    elif method =='SLO':
+        M1_vals = SLO_simple(Egsf, M1[0], M1[1], M1[2])
+        gsfE1 = gsf[:,1] - M1_vals
+        gsfM1 = M1_vals
 
     # REMEMBER that the TALYS functions are given in mb/MeV (Goriely's tables)
     # so we must convert it (simple factor)
@@ -948,7 +1041,28 @@ def make_TALYS_tab_file(talys_nld_path, ocl_nld_path, A, Z):
     with open(talys_nld_path, 'w') as write_obj:
         write_obj.write(newfile_content)
     
-        
+
+def gen_nld_table_simple(A, NLDa, Eshift, Estop, nld_mat, nld_table_target_path):
+    spinpars = {"mass": A, "NLDa": NLDa, "Eshift": Eshift}
+
+    # load/write nld
+    fn_nld_out = nld_table_target_path
+    nld = nld_mat
+
+    # If you comment out extrapolation below, it will do a log-linear
+    # extrapolation of the last two points. This is probably not what you want.
+    # fnld = log_interp1d(nld[:, 0], nld[:, 1], fill_value="extrapolate")
+    fnld = log_interp1d(nld[:, 0], nld[:, 1])
+
+    # print(f"Below {nld[0, 0]} the nld is just an extrapolation
+    #       "Best will be to use discrete levels in talys below that")
+    table = gen_nld_table(fnld=fnld, Estop=Estop, model="EB05", spinpars=spinpars, A=A)
+    fmt = "%7.2f %6.3f %9.2E %8.2E %8.2E" + 30*" %8.2E"
+    #header = "U[MeV]  T[MeV]  NCUMUL   RHOOBS   RHOTOT     J=0      J=1      J=2      J=3      J=4      J=5      J=6      J=7      J=8      J=9     J=10     J=11     J=12     J=13     J=14     J=15     J=16     J=17     J=18     J=19     J=20     J=21     J=22     J=23     J=24     J=25     J=26     J=27     J=28     J=29"
+    np.savetxt(fn_nld_out, table, fmt=fmt)
+    
+    return table
+
 def find_chis(vals,chis):
     #function taking as input all chi2-scores associated to the values for a single energy or temperature
     #it finds where the function crosses the chi2+1 line

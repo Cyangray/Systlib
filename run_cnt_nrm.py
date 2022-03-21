@@ -72,7 +72,10 @@ for b in blist:
     new_rho_str = '{:.6f}'.format(new_rho)
     new_D_str = '{:.6f}'.format(new_D)
     new_dir_rho = bstr + '-' + str(int(new_rho))
-    os.mkdir(new_dir_rho)
+    try:
+        os.mkdir(new_dir_rho)
+    except:
+        pass
     os.chdir(new_dir_rho) 
     for L1n in range(1,L1max):
         L1 = str(L1n)
@@ -83,7 +86,10 @@ for b in blist:
         for L2n in range(L1n + L2_skip, L1max):
             L2 = str(L2n)
             new_dir_L1_L2 = 'L1-'+L1+'_L2-'+L2
-            os.mkdir(new_dir_L1_L2)
+            try:
+                os.mkdir(new_dir_L1_L2)
+            except:
+                pass
             os.chdir(new_dir_L1_L2)
             os.system('cp ../../../counting.dat counting.dat')
             os.system('cp ../../../rhosp.rsg rhosp.rsg')
@@ -97,7 +103,10 @@ for b in blist:
             for Gg in Gglist:
                 Ggstr = str(int(Gg))
                 Gg_input_str = '{:.6f}'.format(Gg)
-                os.mkdir(Ggstr)
+                try:
+                    os.mkdir(Ggstr)
+                except:
+                    pass
                 os.chdir(Ggstr)
                 os.system('cp ../rhosp.rsg rhosp.rsg')
                 os.system('cp ../rhotmopaw.cnt rhotmopaw.cnt')

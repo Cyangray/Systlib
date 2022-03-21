@@ -34,7 +34,7 @@ chi2_lim = [6,10]  #Fitting interval. Limits are included. [14,18] is a nice reg
 chi2_lim2 = [14,18]
 
 method = 'linear'
-load_lists = True
+load_lists = False
 database_path = 'Make_dataset/127Sb-database/'
 plot_chis = True
 astro = True
@@ -126,8 +126,13 @@ else:
                     curr_gsf = gsf(database_path + new_dir_rho + '/' + new_dir_L1_L2 + '/' + Ggstr + '/strength.nrm', a0 = a0, a1 = a1, is_sigma = False, is_ocl = True)
                     Bnorm = import_Bnorm(database_path + new_dir_rho + '/' + new_dir_L1_L2 + '/' + Ggstr + '/input.nrm')
                     if astro:
-                        curr_ncrate = astrorate(database_path + new_dir_rho + '/' + new_dir_L1_L2 + '/' + Ggstr + '/astrorate.g')
-                        objs = [curr_gsf, curr_ncrate]
+                        found_astro = False
+                        try:
+                            curr_ncrate = astrorate(database_path + new_dir_rho + '/' + new_dir_L1_L2 + '/' + Ggstr + '/astrorate.g')
+                            objs = [curr_gsf, curr_ncrate]
+                            found_astro = True
+                        except:
+                            objs = [curr_gsf]
                     else:
                         objs = [curr_gsf]
     
@@ -143,7 +148,7 @@ else:
                         el.b = b
                         el.chi2 = curr_nld.chi2 + ((Gg_mean - el.Gg)/Gg_sigma)**2
                     gsfs.append(curr_gsf)
-                    if astro:
+                    if astro and found_astro:
                         ncrates.append(curr_ncrate)
                         
     # save lists of nlds and gsfs to file
@@ -220,20 +225,24 @@ if plot_chis:
     rng = 2
     if astro:
         axs2.plot(ncratesvals,ncrateschis,'b.',alpha=0.5)
+        axs2.plot(ncratesvals,ncrateschis,'b.',alpha=1)
         axs2.plot(ncratesvals[ncrateschi_argmin],ncrateschimin,'go', label=r'$\chi_{min}^2$')
         axs2.plot(astrovalmatrix[temp_bin,3], ncrateschimin+1, 'ro')
         axs2.plot(astrovalmatrix[temp_bin,4], ncrateschimin+1, 'ro')
         axs2.axhline(y=ncrateschimin+1, color='r', linestyle='--', label=r'$\chi_{min}^2$+1 score')
+        axs2.set_ylim(26.4,40)
     
-    axs[0].set_title(r'$\chi^2$-scores for $\rho(E_x=$ %s MeV)'%"{:.2f}".format(nld.energies[energy_bin]))
+    #axs[0].set_title(r'$\chi^2$-scores for $\rho(E_x=$ %s MeV)'%"{:.2f}".format(nld.energies[energy_bin]))
     axs[0].set_ylim(26.4,40)
     axs[0].set_xlim(180,232)
     axs[0].set_xlabel('NLD [MeV$^{-1}$]')
     axs[0].set_ylabel(r'$\chi^2$-score')
-    axs[1].set_title(r'$\chi^2$-scores for $f(E_\gamma=$ %s MeV)'%"{:.2f}".format(gsf.energies[energy_bin]))
+    axs[0].text(0.9, 0.05, 'a)', fontsize='medium', verticalalignment='center', fontfamily='serif', transform = axs[0].transAxes)
+    #axs[1].set_title(r'$\chi^2$-scores for $f(E_\gamma=$ %s MeV)'%"{:.2f}".format(gsf.energies[energy_bin]))
     axs[1].set_ylim(26.4,40)
     axs[1].set_xlim(7e-9,1.6e-8)
     axs[1].set_xlabel('GSF [MeV$^{-3}$]')
+    axs[1].text(0.9, 0.05, 'b)', fontsize='medium', verticalalignment='center', fontfamily='serif', transform = axs[1].transAxes)
     for i in range(rng):
         #axs[i].grid()
         axs[i].legend(loc='upper right', framealpha = 1.)

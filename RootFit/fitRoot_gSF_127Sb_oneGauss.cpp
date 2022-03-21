@@ -135,8 +135,13 @@ double FitFunctionStrength(double *x, double *par){ // x = Egamma, par = array o
     double upbend_M1 = 0.;
     double upbend_pars[2] = {par[7],par[8]};
     upbend_M1 = upbend_Function(x,upbend_pars);
+    
+    // M1 strength
+    double strength_M1 = 0.;
+    double M1_pars[3] = {par[9],par[10],par[11]};
+    strength_M1 = SLO_Function(x,M1_pars);
    
-    double strength_function = GLo + ExcessStrength + upbend_M1;
+    double strength_function = GLo + ExcessStrength + upbend_M1 + strength_M1;
     
     return strength_function;
     
@@ -203,66 +208,13 @@ void fitRoot_gSF_127Sb_oneGauss(){
     }
     strengthfile_oslodata.close();
 
-    // Lepretre data
-    //i=0;
-    //while(gamma_n_data_file_lepretre){
-    //    gamma_n_data_file_lepretre >> x >> y >> z;
-    //    energy_lepretre[i] = x; // gamma energy (MeV)
-    //    gdr_lepretre[i] = y; // cross-section data already converted to gSF in MeV^(-3)
-    //    gdr_lepretre_err[i] = z; // uncertainty
-    //    i++;
-    //}
-    //gamma_n_data_file_lepretre.close();
-
-    // Fultz data
-    //i=0;
-    //while(gamma_n_data_file_fultz){
-    //    gamma_n_data_file_fultz >> x >> y >> z;
-    //    energy_fultz[i]  = x; // gamma energy (MeV)
-    //    gdr_fultz[i]     = y; // cross-section data already converted to gSF in MeV^(-3)
-    //    gdr_fultz_err[i] = z; // uncertainty
-    //    i++;
-    //}
-    //gamma_n_data_file_fultz.close();
-    
-    // Utsunomiya data
-    // This data set is not converted to gSF yet, 
-    // will do it while reading in the values from file.
-    // Need to skip first lines with text
-    //for(i=0;i<13;i++){
-    //    getline(gamma_n_data_file_utsunomiya,line);
-    //    //cout << line << endl;
-    //}
-    //i=0;
-    //while(gamma_n_data_file_utsunomiya){
-    //    gamma_n_data_file_utsunomiya >> x >> y >> z;
-    //    energy_utsunomiya[i]  = x;
-    //    gdr_utsunomiya[i]     = y*factor/x;
-    //    gdr_utsunomiya_err[i] = z*factor/x;
-    //    i++;
-    //}
-    //gamma_n_data_file_utsunomiya.close();
-
 
     // Make graphs
     TGraphErrors *strengthexp_oslo = new TGraphErrors(len_oslodata,energy_oslo,strength_oslo,energyerr,strength_oslo_err);
-    //TGraphErrors *gdr_lepretre_graph = new TGraphErrors(len_lepretre,energy_lepretre,gdr_lepretre,energyerr,gdr_lepretre_err);
-    //TGraphErrors *gdr_fultz_graph = new TGraphErrors(len_fultz,energy_fultz,gdr_fultz,energyerr,gdr_fultz_err);
-    //TGraphErrors *gdr_utsunomiya_graph = new TGraphErrors(len_utsunomiya,energy_utsunomiya,gdr_utsunomiya,energyerr,gdr_utsunomiya_err);
-
-    // Make a combined TGraphErrors for the (gamma,n) data, to determine the GDR strength
-    //TMultiGraph *GDR_data = new TMultiGraph();
-    //GDR_data->Add(gdr_lepretre_graph,"P");
-    //GDR_data->Add(gdr_fultz_graph,"P");
-    //GDR_data->Add(gdr_utsunomiya_graph,"P");
     
     // Make a combined graph with all data
     TMultiGraph *OCL_and_GDR_data = new TMultiGraph();
     OCL_and_GDR_data->Add(strengthexp_oslo,"P");
-    //OCL_and_GDR_data->Add(gdr_lepretre_graph,"P");
-    //OCL_and_GDR_data->Add(gdr_fultz_graph,"P");
-    //OCL_and_GDR_data->Add(gdr_utsunomiya_graph,"P");
-   
    
     // START VALUES for the GDR parameters. 
     // Initializing from 1st fit with just GDR data
@@ -281,6 +233,11 @@ void fitRoot_gSF_127Sb_oneGauss(){
     // START VALUES upbend
     double constant1_upb = 1.863E-08; // scaling
     double constant2_upb = 0.28; // slope
+    
+    // START VALUES M1 strength
+    double E_m1 = 9.3025;
+    double gamma_m1 = 3.2984;
+    double sigma_m1 = 5.4834;
 
     
     // Make canvas and histogram for axes, and plot stuff
@@ -309,71 +266,21 @@ void fitRoot_gSF_127Sb_oneGauss(){
 	strengthexp_oslo->SetMarkerSize(0.8);
 	strengthexp_oslo->Draw("P");
     
-    //gdr_lepretre_graph->SetMarkerStyle(20);
-    //gdr_lepretre_graph->SetMarkerSize(0.8);
-    //gdr_lepretre_graph->SetMarkerColor(kAzure+10);
-    //gdr_lepretre_graph->SetLineColor(kAzure+10);
-    //gdr_lepretre_graph->Draw("P");
-
-    //gdr_fultz_graph->SetMarkerStyle(32);
-    //gdr_fultz_graph->SetMarkerSize(1.);
-    //gdr_fultz_graph->SetMarkerColor(kMagenta);
-    //gdr_fultz_graph->SetLineColor(kMagenta);
-    //gdr_fultz_graph->Draw("P");
-    
-    //gdr_utsunomiya_graph->SetMarkerStyle(33);
-    //gdr_utsunomiya_graph->SetMarkerSize(1.4);
-    //gdr_utsunomiya_graph->SetMarkerColor(kCyan+2);
-    //gdr_utsunomiya_graph->SetLineColor(kCyan+2);
-    //gdr_utsunomiya_graph->Draw("P");
-    
-
-    // Fit function for the GLO strength (4 parameters)
-    // This can first be fit to the (gamma,n) data to get a better estimate for
-    // the GDR start parameters
-    // Four parameters: par[0] = centroid, par[1] = width, par[2] = peak cross section, par[3] = temperature
-    //                              name of new func, func to use, E_start, E_stop, num_parameters
-    //TF1 *fit_strength_GLO = new TF1("fit_strength_GLO",GLO_Function,10.,17.,4); 
-    //Vector for 4 start parameters (GLO)
-    //double par_array_GLO[7] = {E_r1,Gamma_r1,sigma_r1,temp};
-    //                       p0     p1       p2    p3     p4      p5      p6  
-    //fit_strength_GLO->SetParameters(par_array_GLO);
-    // If needed, set limits on the temperature parameter to ease the fit
-    //fit_strength_GLO->SetParLimits(3,0.1,1.); 
-    // Or fix it if it doesn't behave well
-    //fit_strength_GLO->FixParameter(3,0.3); 
-    
-    //cout << " Fit of GDR part only:" << endl;    
-    //GDR_data->Fit(fit_strength_GLO,"RM+");
-    
-    //fit_strength_GLO->SetLineColor(kBlack);
-    //fit_strength_GLO->SetLineWidth(1);
-    //fit_strength_GLO->SetLineStyle(1);
-    //fit_strength_GLO->Draw("L same"); // Will rather draw the final fit later... 
-    
-    // Now we have good start parameters for the GLO part.
-    // Grab the obtained parameters to be used in the fit 
-    // to all data.  
-    //E_r1 = fit_strength_GLO->GetParameter(0);
-    //Gamma_r1 = fit_strength_GLO->GetParameter(1);
-    //sigma_r1 = fit_strength_GLO->GetParameter(2);
-    //temp = fit_strength_GLO->GetParameter(3);
-    
     // Total fit function with GLO, Gaussian pygmy, and upbend. 
-    // In total 9 parameters
-    TF1 *fit_strength = new TF1("fit_strength",FitFunctionStrength,1.6,16.9,9); 
+    // In total 12 parameters
+    TF1 *fit_strength = new TF1("fit_strength",FitFunctionStrength,1.6,16.9,12); 
     
     // Vector for 9 start parameters
     // Pygmy dipole resonance, as a Gaussian
     // Three parameters: par[4] = scaling, par[5] = standard deviation, par[6] = centroid
-    double par_array_totalfit[9] = {E_r1,Gamma_r1,sigma_r1,temp,scaling1,stdev1,E_pyg1,constant1_upb,constant2_upb};
+    double par_array_totalfit[12] = {E_r1,Gamma_r1,sigma_r1,temp,scaling1,stdev1,E_pyg1,constant1_upb,constant2_upb,E_m1,gamma_m1,sigma_m1};
     // In terminal output:           p0     p1       p2     p3     p4      p5     p6         p7        p8         
     fit_strength->SetParameters(par_array_totalfit);
     fit_strength->SetLineColor(kAzure+7);
     // If needed, it's possible to fix parameters from the fit of just the GDR data 
-    //fit_strength->FixParameter(0,E_r1); 
-    //fit_strength->FixParameter(1,Gamma_r1); 
-    //fit_strength->FixParameter(2,sigma_r1); 
+    fit_strength->FixParameter(9,E_m1); 
+    fit_strength->FixParameter(10,gamma_m1); 
+    fit_strength->FixParameter(11,sigma_m1); 
     
     // We might also want to set limits on the GDR parameters 
     fit_strength->SetParLimits(0,15.,15.72); 
@@ -385,6 +292,13 @@ void fitRoot_gSF_127Sb_oneGauss(){
     cout << " Total fit funtion: " << endl;      
     OCL_and_GDR_data->Fit(fit_strength,"RM+");
     fit_strength->Draw("L same");
+    TF1 *fitresult = OCL_and_GDR_data->GetFunction("fit_strength");
+    double chi2 = fitresult->GetChisquare();
+    double degrees_of_freedom = fitresult->GetNDF();
+    cout << " The chi^2 value: " << chi2 << endl;
+    cout << " Degrees of freedom: " << degrees_of_freedom << endl;
+    cout << " Reduced chi^2 = " << chi2/degrees_of_freedom << endl;
+    
 
  
     // Now we have all the parameters for the fitted gamma strength. 
@@ -430,6 +344,19 @@ void fitRoot_gSF_127Sb_oneGauss(){
     plot_strength_upbend->SetLineStyle(2);
     plot_strength_upbend->SetLineColor(kBlack);
     plot_strength_upbend->Draw("L same");
+    
+    // Making a function just for plotting the SLO M1 strength for a wider range of energies
+    TF1 *plot_strength_SLO = new TF1("plot_strength_SLO",SLO_Function,0.5,25.,3); 
+    // Now, fix parameters from the fit above 
+    plot_strength_SLO->FixParameter(0,E_m1); 
+    plot_strength_SLO->FixParameter(1,gamma_m1); 
+    plot_strength_SLO->FixParameter(2,sigma_m1);
+
+    plot_strength_SLO->SetLineWidth(1);
+    plot_strength_SLO->SetLineStyle(2);
+    plot_strength_SLO->SetLineColor(kBlack);
+    plot_strength_SLO->Draw("L same");
+   
 
     // Legend for data.         x1   y1   x2  y2   Coordinates in normalized values, x and y from 0 to 1 
     TLegend *leg = new TLegend(0.15,0.70,0.6,0.88);
@@ -437,7 +364,7 @@ void fitRoot_gSF_127Sb_oneGauss(){
     leg->SetTextFont(42);
     leg->SetTextSize(0.03);
     leg->SetFillColor(0);
-    leg->AddEntry(strengthexp_oslo," ^{117}Sn(^{3}He,^{3}He'#gamma), OCL ","PE");
+    leg->AddEntry(strengthexp_oslo," ^{124}Sn(^{4}He,p'#gamma), OCL ","PE");
     //leg->AddEntry(gdr_lepretre_graph," ^{117}Sn(#gamma,n), Lepretre #it{et al.} ","PE");
     //leg->AddEntry(gdr_fultz_graph," ^{117}Sn(#gamma,n), Fultz #it{et al.} ","PE");  
     //leg->AddEntry(gdr_utsunomiya_graph," ^{117}Sn(#gamma,n), Utsunomiya #it{et al.} ","PE");  
@@ -454,14 +381,14 @@ void fitRoot_gSF_127Sb_oneGauss(){
     leg2->AddEntry(plot_strength_upbend," Upbend ","L");   
     leg2->AddEntry(fit_strength," Total fit  ","L");   
     leg2->Draw();
-
+    leg2->AddEntry(plot_strength_SLO," M1 strength  ","L");   
 
 	TLatex t;
 	t.SetTextSize(0.05);
 	//t.DrawLatex(    19.416,9.080e-07,"^{51}Ti");
     
 	c1->Update();
-    c1->Print("fitRoot_gSF_117Sn.pdf");
+    c1->Print("fitRoot_gSF_127Sb.pdf");
 
     // Print E1 and M1 strengths to file, to use in the TALYS calculations
     // REMEMBER that the TALYS functions are given in mb/MeV (Goriely's tables)
@@ -493,8 +420,8 @@ void fitRoot_gSF_127Sb_oneGauss(){
 
     // The M1 part is here believed to be only the upbend. 
     // We could also have included a spin-flip 
-    M1file = fopen("M1_gsf_117Sn_TALYSformat.txt","w");
-    fprintf(M1file," Z=  50 A= 117\n");
+    M1file = fopen("M1_gsf_127Sb_TALYSformat.txt","w");
+    fprintf(M1file," Z=  51 A= 127\n");
     fprintf(M1file,"  U[MeV]  fM1[mb/MeV]\n");
     dummy = 0.1;
     //cout << " M1 strength:" << endl;
@@ -505,6 +432,6 @@ void fitRoot_gSF_127Sb_oneGauss(){
     }
     fclose(M1file);
     
-    cout << " Modeled strength functions for 117Sn written in TALYS format. " << endl;
+    cout << " Modeled strength functions for 127Sb written in TALYS format. " << endl;
 
 }

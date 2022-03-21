@@ -221,18 +221,20 @@ elif What_fit == 'Gg':
             ax.plot([117,127], [Y_pred0[0,0],Y_pred[0,0]],'k--')
         ax.plot(127,105,'k^', label = r'$^{127}$Sb, pred.')
         ax.errorbar(127, 105, yerr=25, color='k', capsize=2, ls='none')
-        ax.annotate(r'$^{127}$Sb', xy = (127, 105), xytext=(127, 105))
+        
         #plt.yscale('log')
         #plt.grid()
         plt.legend()
         if Gg_axis == 'A':
             for index, row in df.iterrows():
-                ax.annotate(ToLatex(row['index']), xy = (row['A'], row['Gg_Mugh']), xytext=(row['A'], row['Gg_Mugh']))
+                ax.annotate(ToLatex(row['index']), xy = (row['A'], row['Gg_Mugh']), xytext=(row['A'] + 0.2, row['Gg_Mugh']))
+                ax.annotate(r'$^{127}$Sb', xy = (127, 105), xytext=(127.2, 105))
             ax.set_xlabel('A')
             
         elif Gg_axis == 'Sn':
             for index, row in df.iterrows():
                 ax.annotate(ToLatex(row['index']), xy = (row['Sn'], row['Gg_Mugh']), xytext=(row['Sn'] + 40, row['Gg_Mugh']))
+                ax.annotate(r'$^{127}$Sb', xy = (8383, 105), xytext=(8423, 105))
             ax.set_xlabel(r'$S_n$ [MeV]')
-        ax.set_xlim(115,131.9)
+        ax.set_xlim(115.5,131.9)
         plt.show()

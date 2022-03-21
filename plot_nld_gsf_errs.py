@@ -11,15 +11,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 from readlib import readstrength
-from systlib import import_ocl
+from systlib import import_ocl, SLO_simple
 
 #parameters. play with these
 L1max = 23
 L2max = 23
 enbin = 22
-errorbars = True
-conf90=False
-confsigmas = True
 
 #Don't modify unless you know what you're doing
 blist = np.linspace(0.40,1.4,50)
@@ -30,8 +27,21 @@ a1 = 0.1562
 sig = 0.341
 limit_points = np.linspace(0.0,1.0,21)
 
-ranges = [[-1,6], [np.log10(5e-9),-6]]
+ranges = [[-1,6], [np.log10(5e-9),np.log10(3.7e-7)]]
 database_path = 'Make_dataset/127Sb-database/'
+
+#load best fits
+best_fits = np.load('data/generated/best_fits.npy', allow_pickle = True)
+best_gsf = best_fits[1]
+best_gsf.clean_nans()
+best_gsf.delete_point(-1)
+best_nld = best_fits[0]
+best_nld.clean_nans()
+best_nld.delete_point([-1,-2,-3])
+
+#load M1-strength
+Sn127_M1_par = np.loadtxt('data/generated/127Sn_M1_params')
+res = Sn127_M1_par[:,0]
 
 #import experimental nld and gsf
 nld_mat = np.genfromtxt('data/generated/nld_whole.txt', unpack = True).T
@@ -54,11 +64,12 @@ TALYS_strengths = [readstrength(51, 127, 1, 1, strength, 1) for strength in rang
 
 #start plotting
 cmap = matplotlib.cm.get_cmap('Dark2')
+cmap = matplotlib.cm.get_cmap('YlGnBu')
 fig,doubleaxs = plt.subplots(nrows = 1, ncols = 2)
 fig0,ax0 = plt.subplots()
 fig1,ax1 = plt.subplots()
 singleaxs = [ax0,ax1]
-fig.set_size_inches(20, 10)
+#fig.set_size_inches(20, 10)
 chi2_lim = [6,10]
 chi2_lim2 = [14,18]
 rhos = [b*base_rho for b in blist]
@@ -71,32 +82,30 @@ for ax in (doubleaxs[0], ax0):
     ax.errorbar(Sn, middlerho,yerr=errorrho,ecolor='g',linestyle=None, elinewidth = 4, capsize = 5, label=r'$\rho$ at Sn')
 
 #Plot experiment data
-for doubleax, singleax, val_matrix in zip(doubleaxs, singleaxs, [nld_mat, gsf_mat]):
+for doubleax, singleax, val_matrix, staterrs in zip(doubleaxs, singleaxs, [nld_mat, gsf_mat], [best_nld.yerr, best_gsf.yerr]):
     for ax in (doubleax, singleax):
-        ax.plot(val_matrix[:,0], val_matrix[:,1], 'bo', label = 'Oslo data')
-        if errorbars:
-            lower_err = val_matrix[:,1] - val_matrix[:,3]
-            upper_err = val_matrix[:,-2] - val_matrix[:,1]
-            ax.errorbar(val_matrix[:,0], val_matrix[:,1],yerr=[lower_err, upper_err],color = 'b', ecolor='b')
-        else:
-            if conf90:
-                ax.fill_between(val_matrix[:,0], val_matrix[:,3], val_matrix[:,-2], color = 'c', alpha = 0.2, label='90% confidence')
-            elif confsigmas:
-                ax.fill_between(val_matrix[:,0], val_matrix[:,2], val_matrix[:,-1], color = 'c', alpha = 0.2, label=r'2$\sigma$ confidence')
-                ax.fill_between(val_matrix[:,0], val_matrix[:,3], val_matrix[:,-2], color = 'b', alpha = 0.2, label=r'1$\sigma$ confidence')
-            else:
-                for conf in range(int(len(limit_points)/2 - 0.5)):
-                    ax.fill_between(val_matrix[:,0], val_matrix[:,2+conf], val_matrix[:,-(conf+1)], color = cmap((conf*2 + 1)/len(limit_points)), alpha = 0.2, label=str(int((limit_points[-(conf+1)] - limit_points[conf])*100)) + '% confidence')
+        ax.fill_between(val_matrix[:,0], val_matrix[:,2], val_matrix[:,-1], color = 'c', alpha = 0.2, label=r'2$\sigma$ conf.')
+        ax.fill_between(val_matrix[:,0], val_matrix[:,3], val_matrix[:,-2], color = 'b', alpha = 0.2, label=r'1$\sigma$ conf.')
+        #ax.plot(val_matrix[:,0], val_matrix[:,1], 'b.', label = 'Oslo data')
+        ax.errorbar(val_matrix[:,0], val_matrix[:,1],yerr=staterrs, fmt = '.', color = 'b', ecolor='b', label='Oslo data')
         
         ax.vlines(x=Sn, ymin=0, ymax = 1e6, colors='purple', ls='--', alpha = 0.5, label=r'$S_n$')
         ax.set_xlabel('Energy [MeV]')
         ax.set_yscale('log')
 
 #plot TALYS strengths
+
+stls = ['-','--','-.',':','-','--','-.',':']
+#x_values_cont = np.linspace(0,20,1000)
+#doubleaxs[1].plot(x_values_cont, SLO_simple(x_values_cont, res[0], res[1], res[2]), '--', label="SLO_fit")
+#ax1.plot(x_values_cont, SLO_simple(x_values_cont, res[0], res[1], res[2]), '--', label="SLO_fit")
 for i, TALYS_strength in enumerate(TALYS_strengths):
-    stl = '--'
-    doubleaxs[1].plot(TALYS_strength[:,0],TALYS_strength[:,2], color = cmap(i/8), linestyle = stl, label = 'strength %d'%(i+1))
-    ax1.plot(TALYS_strength[:,0],TALYS_strength[:,2], color = cmap(i/8), linestyle = stl, label = 'strength %d'%(i+1))
+    if i<4:
+        col = 3
+    else:
+        col = 8
+    doubleaxs[1].plot(TALYS_strength[:,0],TALYS_strength[:,2], color = cmap(col/8), linestyle = stls[i], alpha = 0.8, label = 'strength %d'%(i+1))
+    ax1.plot(TALYS_strength[:,0],TALYS_strength[:,2], color = cmap(col/8), linestyle = stls[i], alpha = 0.8, label = 'strength %d'%(i+1))
 
 #import GLO parameters 127Sb 
 Sb127_par = np.loadtxt('data/generated/127Sb_params')
@@ -108,7 +117,7 @@ for axs in (singleaxs, doubleaxs):
     axs[1].set_ylabel(r'GSF [MeV$^{-3}$]')
     axs[0].set_ylim(10**ranges[0][0],10**ranges[0][1])
     axs[1].set_ylim(10**ranges[1][0],10**ranges[1][1])
-    axs[1].set_xlim(0.3,9)
+    axs[1].set_xlim(0.1,8.6)
     for ax in axs:
         #ax.grid()
         ax.legend(loc = 'upper left', ncol = 2)
