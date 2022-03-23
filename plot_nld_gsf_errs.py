@@ -96,9 +96,6 @@ for doubleax, singleax, val_matrix, staterrs in zip(doubleaxs, singleaxs, [nld_m
 #plot TALYS strengths
 
 stls = ['-','--','-.',':','-','--','-.',':']
-#x_values_cont = np.linspace(0,20,1000)
-#doubleaxs[1].plot(x_values_cont, SLO_simple(x_values_cont, res[0], res[1], res[2]), '--', label="SLO_fit")
-#ax1.plot(x_values_cont, SLO_simple(x_values_cont, res[0], res[1], res[2]), '--', label="SLO_fit")
 for i, TALYS_strength in enumerate(TALYS_strengths):
     if i<4:
         col = 3

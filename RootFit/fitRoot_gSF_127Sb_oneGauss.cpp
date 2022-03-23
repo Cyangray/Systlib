@@ -1,10 +1,5 @@
-// Script to fit the 117Sn gamma strength function together with
-// 117Sn(gamma,n) data 
-// Ann-Cecilie Larsen
-// a.c.larsen@fys.uio.no
-// 21 Jan 2022
-// Last update: 21 Jan 2022
-
+// Script to fit the 127Sb gamma strength function, based on code from Ann-Cecilie Larsen
+// Francesco Pogliano
 
 // TOTAL FIT FUNCTION 
 // Generalized Lorentzian, one peak - NB!! NOT enhanced GLO! 

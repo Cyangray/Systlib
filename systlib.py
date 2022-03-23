@@ -35,7 +35,22 @@ def SLO(E, T, E0, Gamma0, sigma0):
 	funct = const * sigma0 * E * Gamma0**2 / ( (E**2 - E0**2)**2 + E**2 * Gamma0**2 )
 	return funct
 
+def SLO_arglist(E, args):
+	# Standard Lorentzian, adapted from Kopecky & Uhl (1989) eq. (2.1)
+    E0, Gamma0, sigma0 = args
+    funct = const * sigma0 * E * Gamma0**2 / ( (E**2 - E0**2)**2 + E**2 * Gamma0**2 )
+    return funct
+
 def GLO(E, T, E0, Gamma0, sigma0):
+    # General Lorentzian, adapted from Kopecky & Uhl (1989) eq. (2.4)
+    Gamma = Gamma0 * (E**2 + 4* np.pi**2 * T**2) / E0**2
+    param1 = (E*Gamma)/( (E**2 - E0**2)**2 + E**2 * Gamma**2 )
+    param2 = 0.7*Gamma0*4*np.pi**2 *T**2 /E0**5
+    funct = const * (param1 + param2)*sigma0*Gamma0
+    return funct
+
+def GLO_arglist(E, args):
+    E0, Gamma0, sigma0, T = args
     # General Lorentzian, adapted from Kopecky & Uhl (1989) eq. (2.4)
     Gamma = Gamma0 * (E**2 + 4* np.pi**2 * T**2) / E0**2
     param1 = (E*Gamma)/( (E**2 - E0**2)**2 + E**2 * Gamma**2 )
@@ -46,11 +61,19 @@ def GLO(E, T, E0, Gamma0, sigma0):
 def gauss(E, T, E0, C, sigma):
     return C*np.exp(-(E-E0)**2/(2*sigma**2))/(sqrt2pi*sigma)
 
+def gauss_arglist(E, args):
+    E0, C, sigma = args
+    return C*np.exp(-(E-E0)**2/(2*sigma**2))/(sqrt2pi*sigma)
+
 def upbend(E, T, a_up, C, sigma):
     return C*np.exp(a_up*E)
 
 def upbend_draw(E,C,a_up):
     return C*np.exp(a_up*E)
+
+def upbend_draw_arglist(E,args):
+    a_up, C = args
+    return C*np.exp(-a_up*E)
 
 def SLO_simple(E, E0, Gamma0, sigma0):
 	# Standard Lorentzian, adapted from Kopecky & Uhl (1989) eq. (2.1)
