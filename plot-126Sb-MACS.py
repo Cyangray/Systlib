@@ -26,11 +26,7 @@ strength = [1,2,3,4,5,6,7,8]    #Which strength function to read - numbers from 
 nld = [1,2,3,4,5,6]
 mass = [1,2,3]
 errorbars = False
-<<<<<<< HEAD
 rates = False
-=======
-rates = True
->>>>>>> 1caa57bc5e6f56f0bd01a8f8f793865ef0b0a907
 Sb127_mass = 125.907247480 #in a.u.
 
 #constants
@@ -63,7 +59,6 @@ for ld in nld:
                     if val < min_val[i]:
                         min_val[i] = val
                     
-<<<<<<< HEAD
 #Import Oslo data, statistical and systematic errors
 if rates:
     Oslo_mat = np.genfromtxt('data/generated/ncrates_whole.txt', unpack = True).T
@@ -73,16 +68,6 @@ else:
     Oslo_mat = np.genfromtxt('data/generated/MACS_whole.txt', unpack = True).T
     x_Oslo = Oslo_mat[:,0]*k_B #keV
     Oslo_stat = np.loadtxt('data/generated/MACSs_stats.txt')
-=======
-#Import Oslo data
-if rates:
-    Oslo_mat = np.genfromtxt('data/generated/ncrates_whole.txt', unpack = True).T
-    x_Oslo = Oslo_mat[:,0]
-else:
-    Oslo_mat = np.genfromtxt('data/generated/MACS_whole.txt', unpack = True).T
-    x_Oslo = Oslo_mat[:,0]*k_B #keV
-
->>>>>>> 1caa57bc5e6f56f0bd01a8f8f793865ef0b0a907
 
 #Import other models
 a = readreaclib(nucleus, A, reaclib_file = 'data/ncapture/reaclib')
@@ -110,7 +95,6 @@ cmap = matplotlib.cm.get_cmap('YlGnBu')
 fig, ax = plt.subplots()
 ax.fill_between(x_Oslo, min_val, max_val, color = cmap(1/8), alpha = 1, label = 'TALYS uncertainty span')
 if errorbars:
-<<<<<<< HEAD
     lower_err = Oslo_mat[:,1] - Oslo_mat[:,3] - (Oslo_stat[:,1] - Oslo_stat[:,2])
     upper_err = Oslo_mat[:,-2] - Oslo_mat[:,1] + (Oslo_stat[:,3] - Oslo_stat[:,1])
     ax.errorbar(x_Oslo, Oslo_mat[:,1],yerr=[lower_err, upper_err],ecolor='k')
@@ -121,14 +105,6 @@ else:
     upperline_1s = Oslo_mat[:,4] + (Oslo_stat[:,3] - Oslo_stat[:,1])
     ax.fill_between(x_Oslo, lowerline_2s, upperline_2s, color = cmap(2/8), alpha= 1, label = r'Oslo data, $2\sigma$')
     ax.fill_between(x_Oslo, lowerline_1s, upperline_1s, color = cmap(3/8), alpha= 1, label = r'Oslo data, $1\sigma$')
-=======
-    lower_err = Oslo_mat[:,1] - Oslo_mat[:,3]
-    upper_err = Oslo_mat[:,-2] - Oslo_mat[:,1]
-    ax.errorbar(x_Oslo, Oslo_mat[:,1],yerr=[lower_err, upper_err],ecolor='k')
-else:
-    ax.fill_between(x_Oslo, Oslo_mat[:,2], Oslo_mat[:,5], color = cmap(2/8), alpha= 1, label = r'Oslo data, $2\sigma$')
-    ax.fill_between(x_Oslo, Oslo_mat[:,3], Oslo_mat[:,4], color = cmap(3/8), alpha= 1, label = r'Oslo data, $1\sigma$')
->>>>>>> 1caa57bc5e6f56f0bd01a8f8f793865ef0b0a907
     ax.plot(x_Oslo, Oslo_mat[:,1], color = 'b', linestyle ='-', label = 'Oslo data')
 
 for i, model in enumerate(models):
@@ -157,11 +133,7 @@ if rates:
     ax.set_ylim([3e6,1.3e9])
     ax.legend(ncol=2)
 else:
-<<<<<<< HEAD
     #ax.set_title('MACS for '+ ToLatex(str(A) + Z2Name(nucleus)) + '$(n,\gamma)$')
-=======
-    ax.set_title('MACS for '+ ToLatex(str(A) + Z2Name(nucleus)) + '$(n,\gamma)$')
->>>>>>> 1caa57bc5e6f56f0bd01a8f8f793865ef0b0a907
     ax.set_xlabel(r'$k_B$ $T$ [keV]')
     ax.set_ylabel('MACS [mb]')
     #ax.grid()
